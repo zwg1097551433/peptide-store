@@ -965,7 +965,7 @@ function submitNewPost(){
   const content=document.getElementById('newPostContent').value.trim();
   if(!title){showToast('Please enter a title');return;}
   if(!content){showToast('Please enter content');return;}
-  const newPost={id:Date.now(),title:title,author:currentUser.username,userId:currentUser.id,date:new Date().toISOString().split('T')[0],excerpt:content.substring(0,100)+(content.length>100?'...':''),content:content,views:0,replies:0,comments:[]};
+  const newPost={id:Date.now(),title:title,author:currentUser.username,userId:currentUser.id,date:new Date().toISOString().split('T')[0],excerpt:content.substring(0,100)+(content.length>100?'...':''),content:content,views:0,likes:0,likedBy:[],replies:0,comments:[]};
   FORUM_POSTS.unshift(newPost);
   Store.set('forum',FORUM_POSTS);
   closeModal();
@@ -1025,7 +1025,17 @@ function submitComment(postId){
 }
 function renderAnnouncements(){document.getElementById('announcementBody').innerHTML=ANNOUNCEMENTS.map(a=>'<div style="margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border-light);"><div class="announcement-date">'+a.date+'</div><h4 style="font-size:14px;margin-bottom:6px;">'+a.title+'</h4><p>'+a.body+'</p></div>').join('')}
 function openAnnouncement(){document.getElementById('announcementModal').classList.add('open')}
-function closeModal(id){document.getElementById(id).classList.remove('open')}
+function showModal(html){
+  let m=document.getElementById('dynamicModal');
+  if(!m){m=document.createElement('div');m.id='dynamicModal';m.className='modal-overlay';document.body.appendChild(m);}
+  m.innerHTML=html;
+  m.classList.add('open');
+  m.onclick=function(e){if(e.target===m)m.classList.remove('open');};
+}
+function closeModal(id){
+  if(id){const el=document.getElementById(id);if(el)el.classList.remove('open');}
+  else{const m=document.getElementById('dynamicModal');if(m)m.classList.remove('open');}
+}
 function openAuth(){document.getElementById('authModal').classList.add('open')}
 function switchAuthTab(tab){document.querySelectorAll('.auth-tab').forEach(t=>t.classList.toggle('active',t.dataset.authtab===tab));document.getElementById('authLoginForm').style.display=tab==='login'?'block':'none';document.getElementById('authRegisterForm').style.display=tab==='register'?'block':'none'}
 let toastTimer;function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2500)}
