@@ -981,6 +981,8 @@ function submitNewPost(){
 }
 let _commentImages=[];
 function getCommentEmojiList(){return EMOJI_LIST.slice(0,80).map(e=>'<span class="comment-emoji-item" onclick="insertCommentEmoji(\''+e.replace(/'/g,"\\'")+'\')">'+e+'</span>').join('');}
+function getPostEmojiList(){return EMOJI_LIST.slice(0,80).map(e=>'<span class="comment-emoji-item" onclick="insertPostEmoji(\''+e.replace(/'/g,"\\'")+'\')">'+e+'</span>').join('');}
+function insertPostEmoji(emoji){const textarea=document.getElementById('newPostContent');if(textarea){const start=textarea.selectionStart;const end=textarea.selectionEnd;textarea.value=textarea.value.substring(0,start)+emoji+textarea.value.substring(end);textarea.focus();textarea.selectionStart=textarea.selectionEnd=start+emoji.length;}const picker=document.getElementById('postEmojiPicker');if(picker)picker.classList.remove('show');}
 function toggleCommentEmoji(e){e.stopPropagation();const picker=document.getElementById('commentEmojiPicker');if(picker)picker.classList.toggle('show');}
 function insertCommentEmoji(emoji){const textarea=document.getElementById('commentInput');if(textarea){const start=textarea.selectionStart;const end=textarea.selectionEnd;textarea.value=textarea.value.substring(0,start)+emoji+textarea.value.substring(end);textarea.focus();textarea.selectionStart=textarea.selectionEnd=start+emoji.length;}const picker=document.getElementById('commentEmojiPicker');if(picker)picker.classList.remove('show');}
 function handleCommentImageUpload(e){const files=e.target.files;for(const file of files){const reader=new FileReader();reader.onload=ev=>{_commentImages.push(ev.target.result);updateCommentImgPreview();};reader.readAsDataURL(file);}}
