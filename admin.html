@@ -42,7 +42,7 @@ input,select,textarea{font-family:inherit;font-size:14px}
 .btn-primary:hover{background:var(--primary-dark)}
 .btn-secondary{background:var(--bg);color:var(--text-muted);border:1px solid var(--border)}
 .btn-secondary:hover{background:var(--border)}
-.btn-danger{background:var(--danger-bg);color:var(--danger)}
+.btn-danger{background:var(--danger-bg);color:var(--danger)}.btn-info{background:#17a2b8;color:#fff;border:1px solid #17a2b8}.btn-info:hover{background:#138496}
 .btn-danger:hover{background:#f8d0d0}
 .btn-sm{padding:4px 10px;font-size:12px}
 
@@ -296,6 +296,7 @@ function renderContent(){
   if(currentTab==='settings'){renderSettings(el);return}
   if(currentTab==='coa'){renderCOAManager(el);return}
   if(currentTab==='reviews'){renderReviewsAdmin(el);return}
+  if(currentTab==='forum'){renderForumAdmin(el);return}
   const cfg=ENTITY_CONFIG[currentTab];
   if(!cfg){el.innerHTML='<div class="admin-empty">请选择菜单</div>';return}
   const items=cfg.list();
@@ -374,6 +375,139 @@ function deleteReviewFromDetail(id){
   showToast('评价已删除');
   if(_currentReviewProduct){renderProductReviewsDetail(_currentReviewProduct);}
   else{renderContent();}
+}
+
+// ===== Forum Management =====
+let currentForumPostId=null;
+function renderForumAdmin(el){
+  if(currentForumPostId){
+    renderForumComments(el);
+    return;
+  }
+  const items=FORUM_POSTS.slice().sort((a,b)=>new Date(b.date)-new Date(a.date));
+  let html='<div class="panel"><div class="panel-toolbar"><span style="font-size:13px;color:var(--text-muted);">共 '+items.length+' 个帖子</span><button class="btn btn-primary" onclick="openForumPostForm(null)">+ 添加帖子</button></div>';
+  if(items.length===0){html+='<div class="admin-empty">暂无帖子</div></div>';el.innerHTML=html;return}
+  html+='<table class="admin-table"><thead><tr><th>标题</th><th>作者</th><th>日期</th><th>评论</th><th>浏览</th><th>点赞</th><th>操作</th></tr></thead><tbody>';
+  items.forEach(p=>{
+    const commentCount=p.comments?p.comments.length:(p.replies||0);
+    const title=(p.title||'').substring(0,40)+((p.title||'').length>40?'...':'');
+    html+='<tr><td style="max-width:250px">'+title+'</td><td>'+(p.author||'-')+'</td><td>'+(p.date||'-')+'</td><td>'+commentCount+'</td><td>'+(p.views||0)+'</td><td>'+(p.likes||0)+'</td><td><button class="btn btn-sm btn-secondary" onclick="openForumPostForm('+p.id+')">编辑</button> <button class="btn btn-sm btn-info" onclick="enterForumComments('+p.id+')">管理评论</button> <button class="btn btn-sm btn-danger" onclick="deleteForumPost('+p.id+')">删除</button></td></tr>';
+  });
+  html+='</tbody></table></div>';
+  el.innerHTML=html;
+}
+function enterForumComments(postId){
+  currentForumPostId=postId;
+  renderContent();
+}
+function renderForumComments(el){
+  const post=FORUM_POSTS.find(p=>p.id===currentForumPostId);
+  if(!post){currentForumPostId=null;renderContent();return}
+  const comments=post.comments||[];
+  let html='<div class="panel"><div class="panel-toolbar"><button class="btn btn-secondary" onclick="backToForumList()">← 返回帖子列表</button><span style="font-size:14px;font-weight:600;margin-left:12px">帖子：'+post.title+'</span><span style="font-size:13px;color:var(--text-muted);margin-left:auto">共 '+comments.length+' 条评论</span><button class="btn btn-primary" onclick="openForumCommentForm(null)">+ 添加评论</button></div>';
+  if(comments.length===0){html+='<div class="admin-empty">暂无评论</div></div>';el.innerHTML=html;return}
+  html+='<table class="admin-table"><thead><tr><th>用户</th><th>评论内容</th><th>图片</th><th>日期</th><th>点赞</th><th>操作</th></tr></thead><tbody>';
+  comments.forEach(cm=>{
+    const content=(cm.content||'').substring(0,60)+((cm.content||'').length>60?'...':'');
+    const imgs=(cm.images&&cm.images.length>0)?'<div style="display:flex;gap:4px;flex-wrap:wrap">'+cm.images.slice(0,3).map(img=>'<img src="'+img+'" style="width:40px;height:40px;object-fit:cover;border-radius:4px;cursor:pointer" onclick="viewAdminImage(\''+img+'\')">').join('')+(cm.images.length>3?'<span style="font-size:11px;color:var(--text-muted)">+'+(cm.images.length-3)+'</span>':'')+'</div>':'-';
+    html+='<tr><td>'+(cm.username||'-')+'</td><td style="max-width:300px">'+content+'</td><td>'+imgs+'</td><td>'+(cm.date||'-')+'</td><td>'+(cm.likes||0)+'</td><td><button class="btn btn-sm btn-secondary" onclick="openForumCommentForm(\''+cm.id+'\')">编辑</button> <button class="btn btn-sm btn-danger" onclick="deleteForumComment(\''+cm.id+'\')">删除</button></td></tr>';
+  });
+  html+='</tbody></table></div>';
+  el.innerHTML=html;
+}
+function backToForumList(){
+  currentForumPostId=null;
+  renderContent();
+}
+function openForumPostForm(id){
+  const post=id?FORUM_POSTS.find(p=>p.id===id):null;
+  const title=post?'编辑帖子':'添加帖子';
+  const html='<div class="modal-overlay open" onclick="if(event.target===this)closeModal()"><div class="modal" style="max-width:600px"><div class="modal-header"><h3>'+title+'</h3><button class="modal-close" onclick="closeModal()">×</button></div><div class="modal-body"><div class="form-group"><label>标题 *</label><input type="text" id="fPostTitle" class="form-input" value="'+(post?post.title.replace(/"/g,'&quot;'):'')+'"></div><div class="form-group"><label>作者 *</label><input type="text" id="fPostAuthor" class="form-input" value="'+(post?post.author:'')+'"></div><div class="form-group"><label>日期</label><input type="date" id="fPostDate" class="form-input" value="'+(post?post.date:new Date().toISOString().split('T')[0])+'"></div><div class="form-group"><label>摘要</label><input type="text" id="fPostExcerpt" class="form-input" value="'+(post?(post.excerpt||'').replace(/"/g,'&quot;'):'')+'"></div><div class="form-group"><label>正文 *</label><textarea id="fPostContent" class="form-input" rows="6">'+(post?post.content:'')+'</textarea></div><div class="form-group"><label>浏览数</label><input type="number" id="fPostViews" class="form-input" value="'+(post?p.views||0:0)+'"></div><div class="form-group"><label>点赞数</label><input type="number" id="fPostLikes" class="form-input" value="'+(post?p.likes||0:0)+'"></div></div><div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal()">取消</button><button class="btn btn-primary" onclick="saveForumPost('+(id?id:'null')+')">保存</button></div></div></div>';
+  showModal(html);
+}
+function saveForumPost(id){
+  const title=document.getElementById('fPostTitle').value.trim();
+  const author=document.getElementById('fPostAuthor').value.trim();
+  const content=document.getElementById('fPostContent').value.trim();
+  if(!title){showToast('请输入标题');return}
+  if(!author){showToast('请输入作者');return}
+  if(!content){showToast('请输入正文');return}
+  const data={
+    title:title,author:author,
+    date:document.getElementById('fPostDate').value,
+    excerpt:document.getElementById('fPostExcerpt').value.trim(),
+    content:content,
+    views:parseInt(document.getElementById('fPostViews').value)||0,
+    likes:parseInt(document.getElementById('fPostLikes').value)||0
+  };
+  if(id){
+    const idx=FORUM_POSTS.findIndex(p=>p.id===id);
+    if(idx>=0){FORUM_POSTS[idx]={...FORUM_POSTS[idx],...data};showToast('帖子已更新')}
+  }else{
+    data.id=nextId(FORUM_POSTS);
+    data.userId='admin';
+    data.comments=[];
+    data.likedBy=[];
+    FORUM_POSTS.unshift(data);
+    showToast('帖子已添加');
+  }
+  saveData('forum');
+  closeModal();
+  renderContent();
+}
+function deleteForumPost(id){
+  if(!confirm('确定删除该帖子及其所有评论？'))return;
+  FORUM_POSTS=FORUM_POSTS.filter(p=>p.id!==id);
+  saveData('forum');
+  showToast('帖子已删除');
+  renderContent();
+}
+function openForumCommentForm(commentId){
+  const post=FORUM_POSTS.find(p=>p.id===currentForumPostId);
+  if(!post)return;
+  const comment=commentId?(post.comments||[]).find(c=>c.id===commentId):null;
+  const title=comment?'编辑评论':'添加评论';
+  const html='<div class="modal-overlay open" onclick="if(event.target===this)closeModal()"><div class="modal" style="max-width:600px"><div class="modal-header"><h3>'+title+'</h3><button class="modal-close" onclick="closeModal()">×</button></div><div class="modal-body"><div class="form-group"><label>用户名 *</label><input type="text" id="fCommentUser" class="form-input" value="'+(comment?comment.username:'')+'"></div><div class="form-group"><label>评论内容 *</label><textarea id="fCommentContent" class="form-input" rows="4">'+(comment?comment.content:'')+'</textarea></div><div class="form-group"><label>日期</label><input type="date" id="fCommentDate" class="form-input" value="'+(comment?comment.date:new Date().toISOString().split('T')[0])+'"></div><div class="form-group"><label>点赞数</label><input type="number" id="fCommentLikes" class="form-input" value="'+(comment?comment.likes||0:0)+'"></div></div><div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal()">取消</button><button class="btn btn-primary" onclick="saveForumComment('+(commentId?'\''+commentId+'\'':'null')+')">保存</button></div></div></div>';
+  showModal(html);
+}
+function saveForumComment(commentId){
+  const post=FORUM_POSTS.find(p=>p.id===currentForumPostId);
+  if(!post)return;
+  if(!post.comments)post.comments=[];
+  const username=document.getElementById('fCommentUser').value.trim();
+  const content=document.getElementById('fCommentContent').value.trim();
+  if(!username){showToast('请输入用户名');return}
+  if(!content){showToast('请输入评论内容');return}
+  const data={
+    username:username,content:content,
+    date:document.getElementById('fCommentDate').value,
+    likes:parseInt(document.getElementById('fCommentLikes').value)||0
+  };
+  if(commentId){
+    const idx=post.comments.findIndex(c=>c.id===commentId);
+    if(idx>=0){post.comments[idx]={...post.comments[idx],...data};showToast('评论已更新')}
+  }else{
+    data.id='c_'+Date.now();
+    data.userId='admin';
+    data.likedBy=[];
+    data.images=[];
+    post.comments.push(data);
+    showToast('评论已添加');
+  }
+  post.replies=post.comments.length;
+  saveData('forum');
+  closeModal();
+  renderContent();
+}
+function deleteForumComment(commentId){
+  if(!confirm('确定删除该评论？'))return;
+  const post=FORUM_POSTS.find(p=>p.id===currentForumPostId);
+  if(!post||!post.comments)return;
+  post.comments=post.comments.filter(c=>c.id!==commentId);
+  post.replies=post.comments.length;
+  saveData('forum');
+  showToast('评论已删除');
+  renderContent();
 }
 function openReviewForm(id){
   const r=id?REVIEWS.find(x=>x.id===id):{id:'',productName:'',username:'',rating:5,content:'',images:[],date:new Date().toISOString().split('T')[0]};
