@@ -304,7 +304,7 @@ ul{list-style:none}
 .comment-body{flex:1}
 .comment-user{font-size:13px;font-weight:600}
 .comment-time{font-size:11px;color:var(--text-light)}
-.comment-text{font-size:13px;color:var(--text-muted);margin-top:4px}
+.comment-text{font-size:13px;color:var(--text-muted);margin-top:4px}.comment-form{margin-top:20px;padding:16px;background:var(--bg);border-radius:8px}.comment-textarea{width:100%;min-height:80px;padding:12px;border:1px solid var(--border);border-radius:6px;font-size:14px;resize:vertical;font-family:inherit;margin-bottom:10px;box-sizing:border-box}.comment-submit-btn{background:var(--primary);color:#fff;border:none;padding:8px 20px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:600}.comment-submit-btn:hover{background:var(--primary-dark)}.post-content{font-size:15px;line-height:1.8;color:var(--text);margin:16px 0;padding:16px;background:var(--bg);border-radius:8px}.post-meta{display:flex;gap:16px;font-size:13px;color:var(--text-muted);margin-bottom:8px;flex-wrap:wrap}.comments-section{margin-top:24px}.comments-section h4{font-size:16px;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--border)}
 .back-btn{display:inline-flex;align-items:center;gap:6px;color:var(--text-muted);font-size:14px;margin-bottom:16px;cursor:pointer}
 .back-btn:hover{color:var(--primary)}
 .checkout-page{max-width:800px;margin:0 auto;padding:28px 24px}
@@ -524,7 +524,7 @@ body{padding-bottom:64px}
   <div class="forum-page">
     <div id="forumList-view">
       <div class="forum-header"><h2 data-i18n="forum.title">Community Forum</h2>
-      <button class="forum-new-btn" onclick="showToast('Please login to post')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span data-i18n="forum.newPost">New Post</span></button></div>
+      <button class="forum-new-btn" onclick="showNewPostForm()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span data-i18n="forum.newPost">New Post</span></button></div>
       <div class="forum-list" id="forumFullList"></div>
     </div>
     <div id="forumDetail-view" style="display:none;">
@@ -708,11 +708,11 @@ const DEFAULT_ANNOUNCEMENTS = [
   {id:3,date:'2026-08-28',title:'COA verification system now live',body:'Enter your batch number in the COA tab to view the full certificate of analysis.'}
 ];
 const DEFAULT_FORUM = [
-  {id:1,title:'Tirzepatide vs Semaglutide: Which is better for fat loss?',author:'MikeR',date:'2026-09-08',replies:24,views:1250,excerpt:'After 12 weeks on both, here is my comparison...',content:'Tirzepatide provided stronger appetite suppression with less nausea. Semaglutide was more tolerable at lower doses but plateaued around week 8. Always consult your healthcare provider.'},
-  {id:2,title:'BPC-157 healing timeline — what to expect',author:'SarahL',date:'2026-09-05',replies:18,views:890,excerpt:'Sharing my recovery protocol after a rotator cuff injury...',content:'Day 1-3: slight redness. Day 4-7: pain reduction. Day 8-14: improved range of motion. Day 15-21: near full recovery. Combined with TB-500.'},
-  {id:3,title:'Factory visit report — our manufacturing facility',author:'Admin',date:'2026-09-01',replies:42,views:2100,excerpt:'Behind the scenes at our GMP-certified production facility...',content:'ISO 9001 certified clean rooms, HPLC purity testing on every batch, lyophilization in controlled environment. All products tested for purity >99%.'},
-  {id:4,title:'Best stack for cutting phase? HGH + CJC or IGF?',author:'FitPro',date:'2026-08-28',replies:31,views:760,excerpt:'Looking for the most effective peptide stack for a 12-week cutting phase...',content:'Considering Option A: HGH + CJC-1295 vs Option B: IGF-1 LR3 + Ipamorelin. Goal is preserving muscle while losing fat.'},
-  {id:5,title:'Shipping to Australia — customs experience',author:'OzUser',date:'2026-08-25',replies:15,views:620,excerpt:'Third order delivered successfully to Sydney...',content:'Shipping to Australia takes 7-10 business days. Packaging is discreet. No problems so far.'}
+{id:1,title:'How to store peptides properly?',author:'Researcher101',userId:'demo1',date:'2026-08-10',excerpt:'Best practices for storing lyophilized peptides...',content:'I have been storing my peptides in the refrigerator. Is this the best way? Should I freeze them? What is the shelf life once reconstituted?',views:156,replies:3,comments:[{id:'c1',userId:'demo2',username:'BioChem_Mike',content:'I store lyophilized peptides at -20C and they last for years. Once reconstituted, keep at 4C and use within 2 weeks.',date:'2026-08-11'},{id:'c2',userId:'demo3',username:'LabTech_Sarah',content:'Freeze-thaw cycles degrade peptides. Aliquot before freezing to avoid repeated thawing.',date:'2026-08-12'},{id:'c3',userId:'demo4',username:'PhD_Researcher',content:'Also avoid direct light. Amber vials help protect from UV degradation.',date:'2026-08-15'}]},
+{id:2,title:'Tirzepatide vs Semaglutide for weight loss',author:'FitnessPro',userId:'demo2',date:'2026-08-15',excerpt:'Comparing the two GLP-1 agonists...',content:'Has anyone tried both? What are the main differences in side effects and efficacy? I am considering switching from Semaglutide to Tirzepatide.',views:289,replies:5,comments:[{id:'c4',userId:'demo5',username:'HealthCoach_John',content:'Tirzepatide targets both GIP and GLP-1 receptors, generally shows better weight loss results in clinical trials.',date:'2026-08-16'},{id:'c5',userId:'demo6',username:'Wellness_Amy',content:'I switched 3 months ago. Less nausea with Tirzepatide for me, and lost 8kg more.',date:'2026-08-18'}]},
+{id:3,title:'BPC-157 healing experience分享',author:'RecoveryFan',userId:'demo3',date:'2026-08-20',excerpt:'My personal experience with BPC-157 for tendon repair...',content:'I had a rotator cuff injury for 6 months. Started BPC-157 250mcg daily subQ. After 4 weeks, pain reduced by 70%. Anyone else had similar results?',views:198,replies:4,comments:[{id:'c6',userId:'demo7',username:'Athlete_Mark',content:'Same experience here. Combined with physical therapy, my elbow tendonitis resolved in 6 weeks.',date:'2026-08-21'}]},
+{id:4,title:'COA verification guide',author:'QualityFirst',userId:'demo4',date:'2026-09-01',excerpt:'How to verify Certificate of Analysis...',content:'Always ask for COA before purchasing. Check for HPLC purity >98%, mass spec confirmation, and endotoxin levels. A reputable supplier will provide these.',views:412,replies:2,comments:[{id:'c7',userId:'demo8',username:'LabManager_Tom',content:'Also verify the batch number matches your product. Some suppliers show generic COAs not matching actual batch.',date:'2026-09-02'}]},
+{id:5,title:'Shipping to Europe - customs experience',author:'EU_Buyer',userId:'demo5',date:'2026-09-05',excerpt:'Customs clearance tips for EU customers...',content:'What is everyone experience with shipping peptides to Germany/France? Any customs issues? How long does delivery usually take?',views:167,replies:1,comments:[]}
 ];
 const DEFAULT_REVIEWS = [
   {id:'rev_1',productId:'',productName:'Tirzepatide',userId:'demo1',username:'John D.',rating:5,content:'Excellent quality! Fast shipping to USA. Will order again. 👍',images:[],date:'2026-08-15'},
@@ -869,10 +869,70 @@ function navigateToProductByName(name){
   if(product){currentProduct=product;navigate('product');renderProductDetail();}
   else{showToast('Product not found');}
 }
-function renderForumPreview(){document.getElementById('forumPreview').innerHTML=FORUM_POSTS.slice(0,5).map((p,i)=>'<div class="forum-item" onclick="openForumPost('+p.id+')"><div class="forum-num">'+String(i+1).padStart(2,'0')+'</div><div class="forum-info"><div class="forum-title">'+p.title+'</div><div class="forum-meta">'+p.author+' · '+p.date+' · '+p.replies+' replies</div></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;color:var(--text-light);"><polyline points="9 18 15 12 9 6"/></svg></div>').join('')}
-function renderForumList(){document.getElementById('forumFullList').innerHTML=FORUM_POSTS.map(p=>'<div class="forum-post-card" onclick="openForumPost('+p.id+')"><div class="forum-post-title">'+p.title+'</div><div class="forum-post-excerpt">'+p.excerpt+'</div><div class="forum-post-footer"><span>'+p.author+'</span><span>'+p.date+'</span><span>'+p.replies+' replies</span><span>'+p.views+' views</span></div></div>').join('')}
-function openForumPost(id){const p=FORUM_POSTS.find(x=>x.id===id);if(!p)return;document.getElementById('forumList-view').style.display='none';document.getElementById('forumDetail-view').style.display='block';document.getElementById('postDetailContent').innerHTML='<h2>'+p.title+'</h2><div class="post-meta"><span>'+p.author+'</span><span>'+p.date+'</span><span>'+p.views+' views</span><span>'+p.replies+' replies</span></div><div class="post-content">'+p.content.replace(/\n/g,'<br>')+'</div><div class="comments-section"><h4>Comments ('+p.replies+')</h4><div class="comment"><div class="comment-avatar">R</div><div class="comment-body"><div class="comment-user">Researcher101 <span class="comment-time">2 days ago</span></div><div class="comment-text">Great insights, thanks for sharing!</div></div></div></div>';navigate('forum');window.scrollTo({top:0})}
+function renderForumPreview(){document.getElementById('forumPreview').innerHTML=FORUM_POSTS.slice(0,5).map((p,i)=>'<div class="forum-item" onclick="openForumPost('+p.id+')"><div class="forum-num">'+String(i+1).padStart(2,'0')+'</div><div class="forum-info"><div class="forum-title">'+p.title+'</div><div class="forum-meta">'+p.author+' · '+p.date+' · '+(p.comments?p.comments.length:p.replies||0)+' replies</div></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;color:var(--text-light);"><polyline points="9 18 15 12 9 6"/></svg></div>').join('')}
+function renderForumList(){
+  const list=document.getElementById('forumFullList');
+  if(!list)return;
+  list.innerHTML=FORUM_POSTS.map(p=>{
+    const replyCount=p.comments?p.comments.length:(p.replies||0);
+    const lastComment=p.comments&&p.comments.length>0?p.comments[p.comments.length-1]:null;
+    return '<div class="forum-post-card" onclick="openForumPost('+p.id+')"><div class="forum-post-title">'+p.title+'</div><div class="forum-post-excerpt">'+p.excerpt+'</div><div class="forum-post-footer"><span>👤 '+p.author+'</span><span>📅 '+p.date+'</span><span>💬 '+replyCount+' replies</span><span>👁️ '+(p.views||0)+' views</span>'+(lastComment?'<span style="margin-left:auto;color:var(--text-muted)">Last: '+lastComment.username+' · '+lastComment.date+'</span>':'')+'</div></div>';
+  }).join('');
+}
+function openForumPost(id){
+  const p=FORUM_POSTS.find(x=>x.id===id);
+  if(!p)return;
+  p.views=(p.views||0)+1;
+  Store.set('forum',FORUM_POSTS);
+  const comments=p.comments||[];
+  let commentsHtml='';
+  if(comments.length>0){
+    commentsHtml=comments.map(c=>'<div class="comment"><div class="comment-avatar">'+(c.username||'U').charAt(0).toUpperCase()+'</div><div class="comment-body"><div class="comment-user">'+(c.username||'Anonymous')+' <span class="comment-time">'+c.date+'</span></div><div class="comment-text">'+c.content.replace(/\n/g,'<br>')+'</div></div></div>').join('');
+  }else{
+    commentsHtml='<div style="text-align:center;color:var(--text-muted);padding:20px;">No comments yet. Be the first to comment!</div>';
+  }
+  const commentForm=currentUser?'<div class="comment-form"><textarea id="commentInput" class="comment-textarea" placeholder="Write your comment..."></textarea><button class="comment-submit-btn" onclick="submitComment('+p.id+')">Post Comment</button></div>':'<div style="text-align:center;padding:16px;background:var(--bg);border-radius:8px;color:var(--text-muted)">Please <a onclick="showAuthModal()" style="color:var(--primary);cursor:pointer;text-decoration:underline">login</a> to comment</div>';
+  document.getElementById('forumList-view').style.display='none';
+  document.getElementById('forumDetail-view').style.display='block';
+  document.getElementById('postDetailContent').innerHTML='<h2>'+p.title+'</h2><div class="post-meta"><span>👤 '+p.author+'</span><span>📅 '+p.date+'</span><span>👁️ '+(p.views||0)+' views</span><span>💬 '+comments.length+' comments</span></div><div class="post-content">'+p.content.replace(/\n/g,'<br>')+'</div><div class="comments-section"><h4>Comments ('+comments.length+')</h4>'+commentsHtml+commentForm+'</div>';
+  navigate('forum');
+  window.scrollTo({top:0});
+}
 function showForumList(){document.getElementById('forumList-view').style.display='block';document.getElementById('forumDetail-view').style.display='none'}
+function showNewPostForm(){
+  if(!currentUser){showToast('Please login to post');showAuthModal();return;}
+  const html='<div class="modal-overlay open" onclick="if(event.target===this)closeModal()"><div class="modal" style="max-width:600px"><div class="modal-header"><h3>Create New Post</h3><button class="modal-close" onclick="closeModal()">×</button></div><div class="modal-body"><div class="form-group"><label>Title</label><input type="text" id="newPostTitle" class="form-input" placeholder="Enter post title..."></div><div class="form-group"><label>Content</label><textarea id="newPostContent" class="form-input" rows="6" placeholder="Write your post..."></textarea></div></div><div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="submitNewPost()">Publish</button></div></div></div>';
+  showModal(html);
+}
+function submitNewPost(){
+  const title=document.getElementById('newPostTitle').value.trim();
+  const content=document.getElementById('newPostContent').value.trim();
+  if(!title){showToast('Please enter a title');return;}
+  if(!content){showToast('Please enter content');return;}
+  const newPost={id:Date.now(),title:title,author:currentUser.username,userId:currentUser.id,date:new Date().toISOString().split('T')[0],excerpt:content.substring(0,100)+(content.length>100?'...':''),content:content,views:0,replies:0,comments:[]};
+  FORUM_POSTS.unshift(newPost);
+  Store.set('forum',FORUM_POSTS);
+  closeModal();
+  showToast('Post published successfully!');
+  renderForumList();
+  renderForumPreview();
+}
+function submitComment(postId){
+  if(!currentUser){showToast('Please login to comment');return;}
+  const input=document.getElementById('commentInput');
+  const content=input.value.trim();
+  if(!content){showToast('Please enter comment');return;}
+  const post=FORUM_POSTS.find(p=>p.id===postId);
+  if(!post)return;
+  if(!post.comments)post.comments=[];
+  post.comments.push({id:'c_'+Date.now(),userId:currentUser.id,username:currentUser.username,content:content,date:new Date().toISOString().split('T')[0]});
+  post.replies=post.comments.length;
+  Store.set('forum',FORUM_POSTS);
+  showToast('Comment posted!');
+  openForumPost(postId);
+  renderForumList();
+  renderForumPreview();
+}
 function renderAnnouncements(){document.getElementById('announcementBody').innerHTML=ANNOUNCEMENTS.map(a=>'<div style="margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border-light);"><div class="announcement-date">'+a.date+'</div><h4 style="font-size:14px;margin-bottom:6px;">'+a.title+'</h4><p>'+a.body+'</p></div>').join('')}
 function openAnnouncement(){document.getElementById('announcementModal').classList.add('open')}
 function closeModal(id){document.getElementById(id).classList.remove('open')}
