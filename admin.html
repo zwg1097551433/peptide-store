@@ -382,21 +382,45 @@ function uploadCOAImages(){
   let processed=0;
   let successCount=0;
   let failCount=0;
+  let newImageCount=0;
   const total=files.length;
   
-  function fileDone(success){
+  function refreshThumbnails(){
+    // Save and refresh to show thumbnails immediately
+    saveData('coa');
+    openCOABatchForm(currentEditingCOABatch.id);
+  }
+  
+  function fileDone(success,newImages){
     processed++;
-    if(success)successCount++;else failCount++;
+    if(success){
+      successCount++;
+      newImageCount+=newImages||0;
+    }else{
+      failCount++;
+    }
+    // Show immediate feedback after each file
+    if(success&&newImages>0){
+      showToast('已上传 '+newImageCount+' 张图片, 正在添加水印...');
+    }
     if(processed===total){
       if(successCount>0){
-        applyWatermarkToAllImages().then(()=>{
-          saveData('coa');
-          const imgCount=(currentEditingCOABatch.images||[]).length;
-          showToast('上传完成: '+successCount+'个文件成功, 当前批次共'+imgCount+'张图片');
-          openCOABatchForm(currentEditingCOABatch.id);
-        });
+        // First refresh to show original images immediately
+        refreshThumbnails();
+        // Then apply watermark in background
+        setTimeout(()=>{
+          applyWatermarkToAllImages().then(()=>{
+            saveData('coa');
+            showToast('水印添加完成, 共'+newImageCount+'张新图片');
+            openCOABatchForm(currentEditingCOABatch.id);
+          }).catch(err=>{
+            console.error('水印处理失败:',err);
+            saveData('coa');
+            openCOABatchForm(currentEditingCOABatch.id);
+          });
+        },300);
       }else{
-        showToast('上传失败: '+failCount+'个文件转换失败, 请检查文件格式或重试');
+        showToast('上传失败: '+failCount+'个文件转换失败');
       }
     }
   }
@@ -405,43 +429,47 @@ function uploadCOAImages(){
     const ext=file.name.split('.').pop().toLowerCase();
     if(ext==='pptx'||ext==='ppt'){
       convertPPTToImages(file).then(images=>{
+        let count=0;
         images.forEach((imgData,i)=>{
           addCOAImageWithOriginal(file.name.replace(/\.(pptx?)$/i,'')+'_页'+(i+1)+'.png',imgData);
+          count++;
         });
-        fileDone(true);
+        fileDone(true,count);
       }).catch(err=>{
-        console.error('PPT转换失败:', err);
+        console.error('PPT转换失败:',err);
         showToast('PPT转换失败: '+file.name);
-        fileDone(false);
+        fileDone(false,0);
       });
     }else if(ext==='pdf'){
       if(!window.pdfJsLoaded){
-        showToast('PDF转换库未加载, 请刷新页面后重试');
-        fileDone(false);
+        showToast('PDF转换库未加载,请刷新页面后重试');
+        fileDone(false,0);
         return;
       }
       convertPDFToImages(file).then(images=>{
         if(images.length===0){
           showToast('PDF无有效页面: '+file.name);
-          fileDone(false);
+          fileDone(false,0);
           return;
         }
+        let count=0;
         images.forEach((imgData,i)=>{
           addCOAImageWithOriginal(file.name.replace(/\.pdf$/i,'')+'_页'+(i+1)+'.png',imgData);
+          count++;
         });
-        fileDone(true);
+        fileDone(true,count);
       }).catch(err=>{
-        console.error('PDF转换失败:', err);
+        console.error('PDF转换失败:',err);
         showToast('PDF转换失败: '+file.name+' - '+err.message);
-        fileDone(false);
+        fileDone(false,0);
       });
     }else{
       const reader=new FileReader();
       reader.onload=e=>{
         addCOAImageWithOriginal(file.name,e.target.result);
-        fileDone(true);
+        fileDone(true,1);
       };
-      reader.onerror=()=>{fileDone(false)};
+      reader.onerror=()=>{fileDone(false,0)};
       reader.readAsDataURL(file);
     }
   });
