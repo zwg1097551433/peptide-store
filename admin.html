@@ -31,7 +31,7 @@ input,select,textarea{font-family:inherit;font-size:14px}
 .admin-logo{font-family:var(--font-display);font-size:18px;font-weight:700;padding:0 20px 20px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:12px}
 .admin-nav-item{padding:11px 20px;cursor:pointer;font-size:14px;display:flex;align-items:center;gap:10px;transition:background .15s;color:rgba(255,255,255,.8)}
 .admin-nav-item:hover{background:rgba(255,255,255,.1);color:#fff}
-.admin-nav-item.active{background:var(--primary);color:#fff;font-weight:600;border-left:3px solid var(--accent)}
+.admin-nav-item.active{background:var(--primary);color:#fff;font-weight:600;border-left:3px solid var(--accent)}.chat-admin-layout{display:flex;height:calc(100vh - 180px);gap:16px}.chat-list{width:280px;background:#fff;border:1px solid var(--border);border-radius:8px;overflow:hidden;display:flex;flex-direction:column}.chat-list-header{padding:12px 16px;border-bottom:1px solid var(--border);font-weight:600;font-size:14px;background:var(--bg)}.chat-list-items{flex:1;overflow-y:auto}.chat-list-item{padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}.chat-list-item:hover{background:var(--bg)}.chat-list-item.active{background:var(--primary-bg);border-left:3px solid var(--primary)}.chat-list-item-name{font-weight:600;font-size:13px;margin-bottom:2px;display:flex;justify-content:space-between;align-items:center}.chat-list-item-unread{background:#e74c3c;color:#fff;font-size:10px;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px}.chat-list-item-preview{font-size:12px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.chat-list-item-time{font-size:11px;color:var(--text-light);margin-top:2px}.chat-main{flex:1;background:#fff;border:1px solid var(--border);border-radius:8px;display:flex;flex-direction:column;overflow:hidden}.chat-main-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}.chat-main-header-info{font-weight:600;font-size:15px}.chat-main-header-email{font-size:12px;color:var(--text-muted)}.chat-main-messages{flex:1;overflow-y:auto;padding:16px;background:#f5f5f5}.admin-chat-msg{margin-bottom:12px;display:flex}.admin-chat-msg.user{justify-content:flex-start}.admin-chat-msg.admin{justify-content:flex-end}.admin-chat-bubble{max-width:70%;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.5;word-wrap:break-word}.admin-chat-msg.user .admin-chat-bubble{background:#fff;border:1px solid var(--border);border-bottom-left-radius:4px}.admin-chat-msg.admin .admin-chat-bubble{background:var(--primary);color:#fff;border-bottom-right-radius:4px}.admin-chat-time{font-size:10px;color:var(--text-muted);margin-top:3px}.admin-chat-input-area{padding:12px 16px;border-top:1px solid var(--border);background:#fff;display:flex;gap:10px}.admin-chat-input{flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:20px;font-size:13px;outline:none}.admin-chat-input:focus{border-color:var(--primary)}.admin-chat-send{padding:10px 24px;background:var(--primary);color:#fff;border:none;border-radius:20px;cursor:pointer;font-size:13px;font-weight:600}.admin-chat-send:hover{opacity:0.9}.chat-empty-state{display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-muted);font-size:14px}
 .admin-nav-item svg{width:16px;height:16px;flex-shrink:0}
 .admin-main{margin-left:220px;padding:24px 32px;flex:1}
 .admin-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
@@ -163,6 +163,7 @@ if (typeof pdfjsLib !== 'undefined') {
     <div class="admin-nav-item" data-tab="forum" onclick="switchTab('forum')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>论坛管理</div>
     <div class="admin-nav-item" data-tab="reviews" onclick="switchTab('reviews')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>评价管理</div>
     <div class="admin-nav-item" data-tab="users" onclick="switchTab('users')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>用户管理</div>
+    <div class="admin-nav-item" data-tab="chat" onclick="switchTab('chat')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>客服管理<span id="adminChatBadge" style="display:none;background:#e74c3c;color:#fff;font-size:10px;min-width:16px;height:16px;border-radius:8px;align-items:center;justify-content:center;padding:0 4px;margin-left:4px;">0</span></div>
     <div class="admin-nav-item" data-tab="orders" onclick="switchTab('orders')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>订单管理</div>
     <div class="admin-nav-item" data-tab="externalOrders" onclick="switchTab('externalOrders')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>站外订单</div>
     <div class="admin-nav-item" data-tab="settings" onclick="switchTab('settings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>系统设置</div>
@@ -230,7 +231,7 @@ function logout(){if(!confirm('确定要退出登录吗？'))return;sessionStora
 if(sessionStorage.getItem('pl_admin_logged')==='1'){document.getElementById('loginScreen').style.display='none';document.getElementById('adminLayout').style.display='flex'}
 
 // ===== Tabs =====
-const TAB_TITLES = {dashboard:'数据概览',products:'产品管理',categories:'分类管理',announcements:'公告管理',coa:'COA管理',factory:'工厂内容',forum:'论坛管理',reviews:'评价管理',users:'用户管理',orders:'订单管理',externalOrders:'站外订单',settings:'系统设置'};
+const TAB_TITLES = {dashboard:'数据概览',products:'产品管理',categories:'分类管理',announcements:'公告管理',coa:'COA管理',factory:'工厂内容',forum:'论坛管理',reviews:'评价管理',users:'用户管理',chat:'客服管理',orders:'订单管理',externalOrders:'站外订单',settings:'系统设置'};
 let currentTab = 'dashboard';
 function switchTab(tab){currentTab=tab;document.querySelectorAll('.admin-nav-item').forEach(n=>n.classList.toggle('active',n.dataset.tab===tab));document.getElementById('pageTitle').textContent=TAB_TITLES[tab]||tab;renderContent()}
 
@@ -318,6 +319,7 @@ function renderContent(){
   const el=document.getElementById('adminContent');
   if(currentTab==='dashboard'){renderDashboard(el);return}
   if(currentTab==='users'){renderUsers(el);return}
+  if(currentTab==='chat'){renderChatAdmin(el);return}
   if(currentTab==='orders'){renderOrders(el);return}
   if(currentTab==='externalOrders'){renderExternalOrders(el);return}
   if(currentTab==='settings'){renderSettings(el);return}
@@ -1627,6 +1629,125 @@ document.getElementById('entityModal').addEventListener('click',e=>{if(e.target.
 
 // ===== User Management =====
 let currentUserDetail = null;
+
+// ========== Customer Service Chat Admin ==========
+let currentAdminChatId = null;
+
+function getAdminChats(){return JSON.parse(localStorage.getItem('pl_chats')||'[]');}
+function saveAdminChats(chats){localStorage.setItem('pl_chats',JSON.stringify(chats));}
+
+function renderChatAdmin(el){
+  const chats=getAdminChats().sort((a,b)=>new Date(b.lastTime||b.createdAt)-new Date(a.lastTime||a.createdAt));
+  
+  let html='<div class="chat-admin-layout">';
+  
+  // Chat list
+  html+='<div class="chat-list"><div class="chat-list-header">会话列表 ('+chats.length+')</div><div class="chat-list-items">';
+  if(chats.length===0){
+    html+='<div style="padding:40px 20px;text-align:center;color:var(--text-muted);font-size:13px;">暂无客户会话</div>';
+  }else{
+    chats.forEach(chat=>{
+      const unread=chat.unreadAdmin||0;
+      const lastMsg=chat.lastMessage||'暂无消息';
+      const lastTime=chat.lastTime?new Date(chat.lastTime).toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
+      html+='<div class="chat-list-item '+(currentAdminChatId===chat.id?'active':'')+'" onclick="selectAdminChat(\''+chat.id+'\')">';
+      html+='<div class="chat-list-item-name"><span>'+(chat.username||'未知用户')+'</span>'+(unread>0?'<span class="chat-list-item-unread">'+unread+'</span>':'')+'</div>';
+      html+='<div class="chat-list-item-preview">'+lastMsg+'</div>';
+      html+='<div class="chat-list-item-time">'+lastTime+'</div>';
+      html+='</div>';
+    });
+  }
+  html+='</div></div>';
+  
+  // Chat main area
+  html+='<div class="chat-main">';
+  if(!currentAdminChatId){
+    html+='<div class="chat-empty-state">👈 请从左侧选择一个客户会话</div>';
+  }else{
+    const chat=chats.find(c=>c.id===currentAdminChatId);
+    if(chat){
+      html+='<div class="chat-main-header"><div><div class="chat-main-header-info">'+(chat.username||'未知用户')+'</div><div class="chat-main-header-email">'+(chat.email||'')+'</div></div></div>';
+      html+='<div class="chat-main-messages" id="adminChatMessages">';
+      if(chat.messages&&chat.messages.length>0){
+        chat.messages.forEach(m=>{
+          const time=new Date(m.time).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});
+          if(m.sender==='user'){
+            html+='<div class="admin-chat-msg user"><div><div class="admin-chat-bubble">'+m.content+'</div><div class="admin-chat-time">'+time+'</div></div></div>';
+          }else{
+            html+='<div class="admin-chat-msg admin"><div><div class="admin-chat-bubble">'+m.content+'</div><div class="admin-chat-time" style="text-align:right">'+time+'</div></div></div>';
+          }
+        });
+      }else{
+        html+='<div style="text-align:center;color:var(--text-muted);padding:40px;">暂无消息</div>';
+      }
+      html+='</div>';
+      html+='<div class="admin-chat-input-area"><input type="text" class="admin-chat-input" id="adminChatInput" placeholder="输入回复消息..." onkeydown="if(event.key===\'Enter\')sendAdminMessage()"><button class="admin-chat-send" onclick="sendAdminMessage()">发送</button></div>';
+    }else{
+      html+='<div class="chat-empty-state">会话不存在</div>';
+    }
+  }
+  html+='</div></div>';
+  
+  el.innerHTML=html;
+  
+  // Scroll to bottom
+  setTimeout(()=>{const msgBox=document.getElementById('adminChatMessages');if(msgBox)msgBox.scrollTop=msgBox.scrollHeight;},50);
+}
+
+function selectAdminChat(chatId){
+  currentAdminChatId=chatId;
+  // Mark admin messages as read
+  let chats=getAdminChats();
+  let chat=chats.find(c=>c.id===chatId);
+  if(chat){chat.unreadAdmin=0;saveAdminChats(chats);}
+  updateAdminChatBadge();
+  renderChatAdmin(document.getElementById('adminContent'));
+}
+
+function sendAdminMessage(){
+  if(!currentAdminChatId)return;
+  const input=document.getElementById('adminChatInput');
+  if(!input)return;
+  const content=input.value.trim();
+  if(!content)return;
+  
+  let chats=getAdminChats();
+  let chat=chats.find(c=>c.id===currentAdminChatId);
+  if(!chat)return;
+  
+  const msg={id:'msg_'+Date.now(),sender:'admin',content:content,time:new Date().toISOString(),read:false};
+  chat.messages.push(msg);
+  chat.lastMessage=content;
+  chat.lastTime=msg.time;
+  chat.unreadUser=(chat.unreadUser||0)+1;
+  saveAdminChats(chats);
+  
+  input.value='';
+  renderChatAdmin(document.getElementById('adminContent'));
+}
+
+function updateAdminChatBadge(){
+  const badge=document.getElementById('adminChatBadge');
+  if(!badge)return;
+  const chats=getAdminChats();
+  const totalUnread=chats.reduce((sum,c)=>sum+(c.unreadAdmin||0),0);
+  if(totalUnread>0){badge.style.display='flex';badge.textContent=totalUnread>99?'99+':totalUnread;}
+  else{badge.style.display='none';}
+}
+
+// Periodically check for new user messages
+setInterval(function(){
+  updateAdminChatBadge();
+  if(currentTab==='chat'&&currentAdminChatId){
+    const chats=getAdminChats();
+    const chat=chats.find(c=>c.id===currentAdminChatId);
+    if(chat&&chat.unreadAdmin>0){
+      chat.unreadAdmin=0;
+      saveAdminChats(chats);
+      renderChatAdmin(document.getElementById('adminContent'));
+    }
+  }
+},3000);
 
 function renderUsers(el){
   if(currentUserDetail){
