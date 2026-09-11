@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AVATR 客服工作台</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f2f5;height:100vh;overflow:hidden}
+
+/* Login Page */
+.login-page{display:flex;align-items:center;justify-content:center;height:100vh;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%)}
+.login-box{background:#fff;padding:40px;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.15);width:380px;max-width:90%}
+.login-logo{text-align:center;margin-bottom:30px}
+.login-logo h1{color:#1a73e8;font-size:28px;margin-bottom:8px}
+.login-logo p{color:#666;font-size:14px}
+.login-form .form-group{margin-bottom:20px}
+.login-form label{display:block;margin-bottom:6px;font-size:14px;color:#333;font-weight:500}
+.login-form input{width:100%;padding:12px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;transition:border-color .2s}
+.login-form input:focus{border-color:#1a73e8}
+.login-btn{width:100%;padding:12px;background:#1a73e8;color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;transition:background .2s}
+.login-btn:hover{background:#1557b0}
+.login-error{color:#e74c3c;font-size:13px;margin-top:10px;text-align:center;display:none}
+
+/* Chat Workspace */
+.workspace{display:flex;flex-direction:column;height:100vh}
+.ws-header{background:#1a73e8;color:#fff;padding:12px 24px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+.ws-header-left{display:flex;align-items:center;gap:12px}
+.ws-header-left h2{font-size:18px}
+.ws-header-left .agent-tag{background:rgba(255,255,255,0.2);padding:4px 12px;border-radius:12px;font-size:13px}
+.ws-header-right{display:flex;align-items:center;gap:16px}
+.ws-status{display:flex;align-items:center;gap:6px;font-size:13px}
+.ws-status-dot{width:8px;height:8px;background:#4caf50;border-radius:50%}
+.ws-logout{background:rgba(255,255,255,0.2);border:none;color:#fff;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:13px;transition:background .2s}
+.ws-logout:hover{background:rgba(255,255,255,0.3)}
+
+.ws-body{flex:1;display:flex;overflow:hidden}
+.chat-list{width:300px;background:#fff;border-right:1px solid #e0e0e0;display:flex;flex-direction:column}
+.chat-list-header{padding:16px;border-bottom:1px solid #e0e0e0;font-weight:600;font-size:15px;color:#333;display:flex;justify-content:space-between;align-items:center}
+.chat-list-count{background:#1a73e8;color:#fff;font-size:11px;padding:2px 8px;border-radius:10px}
+.chat-list-items{flex:1;overflow-y:auto}
+.chat-item{padding:14px 16px;border-bottom:1px solid #f0f0f0;cursor:pointer;transition:background .15s}
+.chat-item:hover{background:#f5f5f5}
+.chat-item.active{background:#e8f0fe;border-left:3px solid #1a73e8}
+.chat-item-name{font-weight:600;font-size:14px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center}
+.chat-item-unread{background:#e74c3c;color:#fff;font-size:10px;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px}
+.chat-item-preview{font-size:12px;color:#999;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-item-time{font-size:11px;color:#bbb;margin-top:3px}
+.chat-empty{text-align:center;padding:40px 20px;color:#999;font-size:13px}
+
+.chat-main{flex:1;display:flex;flex-direction:column;background:#fff}
+.chat-main-header{padding:16px 20px;border-bottom:1px solid #e0e0e0;display:flex;justify-content:space-between;align-items:center}
+.chat-main-info{font-weight:600;font-size:16px;color:#333}
+.chat-main-email{font-size:12px;color:#999;margin-top:2px}
+.chat-messages{flex:1;overflow-y:auto;padding:20px;background:#f5f5f5}
+.msg{margin-bottom:16px;display:flex}
+.msg.user{justify-content:flex-start}
+.msg.agent{justify-content:flex-end}
+.msg-bubble{max-width:70%;padding:10px 14px;border-radius:12px;font-size:14px;line-height:1.5;word-wrap:break-word}
+.msg.user .msg-bubble{background:#fff;border:1px solid #e0e0e0;border-bottom-left-radius:4px}
+.msg.agent .msg-bubble{background:#1a73e8;color:#fff;border-bottom-right-radius:4px}
+.msg-meta{font-size:11px;color:#999;margin-top:4px}
+.msg.agent .msg-meta{text-align:right}
+.msg-agent-name{font-size:11px;color:#1a73e8;margin-bottom:2px;font-weight:500}
+.chat-input-area{padding:16px 20px;border-top:1px solid #e0e0e0;background:#fff;display:flex;gap:10px}
+.chat-input{flex:1;padding:12px 16px;border:1px solid #ddd;border-radius:24px;font-size:14px;outline:none;transition:border-color .2s}
+.chat-input:focus{border-color:#1a73e8}
+.chat-send{padding:12px 28px;background:#1a73e8;color:#fff;border:none;border-radius:24px;cursor:pointer;font-size:14px;font-weight:600;transition:background .2s}
+.chat-send:hover{background:#1557b0}
+.chat-send:disabled{background:#ccc;cursor:not-allowed}
+.chat-empty-state{display:flex;align-items:center;justify-content:center;height:100%;color:#999;font-size:15px}
+
+@media(max-width:768px){
+  .chat-list{width:200px}
+  .ws-header{padding:10px 16px}
+  .ws-header-left h2{font-size:16px}
+  .chat-messages{padding:12px}
+  .msg-bubble{max-width:85%}
+}
+</style>
+</head>
+<body>
+
+<!-- Login Page -->
+<div class="login-page" id="loginPage">
+  <div class="login-box">
+    <div class="login-logo">
+      <h1>AVATR</h1>
+      <p>客服工作台</p>
+    </div>
+    <div class="login-form">
+      <div class="form-group">
+        <label>客服账号</label>
+        <input type="text" id="csUsername" placeholder="请输入客服账号" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label>密码</label>
+        <input type="password" id="csPassword" placeholder="请输入密码" autocomplete="current-password">
+      </div>
+      <button class="login-btn" onclick="csLogin()">登 录</button>
+      <div class="login-error" id="loginError">账号或密码错误</div>
+    </div>
+  </div>
+</div>
+
+<!-- Chat Workspace -->
+<div class="workspace" id="workspace" style="display:none">
+  <div class="ws-header">
+    <div class="ws-header-left">
+      <h2>AVATR 客服工作台</h2>
+      <span class="agent-tag" id="agentTag">客服</span>
+    </div>
+    <div class="ws-header-right">
+      <div class="ws-status"><span class="ws-status-dot"></span>在线</div>
+      <button class="ws-logout" onclick="csLogout()">退出登录</button>
+    </div>
+  </div>
+  <div class="ws-body">
+    <div class="chat-list">
+      <div class="chat-list-header">
+        <span>会话列表</span>
+        <span class="chat-list-count" id="chatCount">0</span>
+      </div>
+      <div class="chat-list-items" id="chatListItems"></div>
+    </div>
+    <div class="chat-main" id="chatMain">
+      <div class="chat-empty-state">👈 请从左侧选择一个客户会话</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== Data Layer ==========
+function getCSAccounts(){
+  try{
+    const accounts=JSON.parse(localStorage.getItem('pl_cs_accounts')||'null');
+    if(accounts&&Array.isArray(accounts)&&accounts.length>0)return accounts;
+  }catch(e){}
+  // Default account
+  const defaults=[{id:1,username:'cs001',password:'123456',nickname:'客服小王',status:'active',createdAt:new Date().toISOString(),lastLogin:null}];
+  localStorage.setItem('pl_cs_accounts',JSON.stringify(defaults));
+  return defaults;
+}
+function saveCSAccounts(accounts){localStorage.setItem('pl_cs_accounts',JSON.stringify(accounts));}
+
+function getChats(){return JSON.parse(localStorage.getItem('pl_chats')||'[]');}
+function saveChats(chats){localStorage.setItem('pl_chats',JSON.stringify(chats));}
+
+function getCurrentCS(){
+  try{return JSON.parse(sessionStorage.getItem('pl_current_cs')||'null');}catch(e){return null;}
+}
+function setCurrentCS(agent){sessionStorage.setItem('pl_current_cs',JSON.stringify(agent));}
+function clearCurrentCS(){sessionStorage.removeItem('pl_current_cs');}
+
+let currentAgent=null;
+let currentChatId=null;
+
+// ========== Login ==========
+function csLogin(){
+  const username=document.getElementById('csUsername').value.trim();
+  const password=document.getElementById('csPassword').value;
+  const errorEl=document.getElementById('loginError');
+  
+  if(!username||!password){
+    errorEl.textContent='请输入账号和密码';
+    errorEl.style.display='block';
+    return;
+  }
+  
+  const accounts=getCSAccounts();
+  const account=accounts.find(a=>a.username===username&&a.password===password&&a.status==='active');
+  
+  if(!account){
+    errorEl.textContent='账号或密码错误，或账号已被禁用';
+    errorEl.style.display='block';
+    return;
+  }
+  
+  // Update last login
+  account.lastLogin=new Date().toISOString();
+  saveCSAccounts(accounts);
+  
+  currentAgent={id:account.id,username:account.username,nickname:account.nickname};
+  setCurrentCS(currentAgent);
+  
+  showWorkspace();
+}
+
+function csLogout(){
+  if(!confirm('确定要退出登录吗？'))return;
+  clearCurrentCS();
+  currentAgent=null;
+  currentChatId=null;
+  document.getElementById('workspace').style.display='none';
+  document.getElementById('loginPage').style.display='flex';
+  document.getElementById('csUsername').value='';
+  document.getElementById('csPassword').value='';
+  document.getElementById('loginError').style.display='none';
+}
+
+function showWorkspace(){
+  document.getElementById('loginPage').style.display='none';
+  document.getElementById('workspace').style.display='flex';
+  document.getElementById('agentTag').textContent=currentAgent.nickname;
+  renderChatList();
+  startPolling();
+}
+
+// ========== Chat List ==========
+function renderChatList(){
+  const chats=getChats().sort((a,b)=>new Date(b.lastTime||b.createdAt)-new Date(a.lastTime||a.createdAt));
+  const container=document.getElementById('chatListItems');
+  document.getElementById('chatCount').textContent=chats.length;
+  
+  if(chats.length===0){
+    container.innerHTML='<div class="chat-empty">暂无会话</div>';
+    return;
+  }
+  
+  container.innerHTML=chats.map(chat=>{
+    const unread=chat.unreadAdmin||0;
+    const lastMsg=chat.lastMessage||'暂无消息';
+    const lastTime=chat.lastTime?new Date(chat.lastTime).toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
+    return '<div class="chat-item'+(currentChatId===chat.id?' active':'')+'" onclick="selectChat(\''+chat.id+'\')">'+
+      '<div class="chat-item-name"><span>'+(chat.username||'未知用户')+'</span>'+(unread>0?'<span class="chat-item-unread">'+unread+'</span>':'')+'</div>'+
+      '<div class="chat-item-preview">'+lastMsg+'</div>'+
+      '<div class="chat-item-time">'+lastTime+'</div>'+
+    '</div>';
+  }).join('');
+}
+
+// ========== Chat Window ==========
+function selectChat(chatId){
+  currentChatId=chatId;
+  renderChatList();
+  renderChatMain();
+  
+  // Mark as read
+  let chats=getChats();
+  let chat=chats.find(c=>c.id===chatId);
+  if(chat){chat.unreadAdmin=0;saveChats(chats);}
+}
+
+function renderChatMain(){
+  const main=document.getElementById('chatMain');
+  const chats=getChats();
+  const chat=chats.find(c=>c.id===currentChatId);
+  
+  if(!chat){
+    main.innerHTML='<div class="chat-empty-state">会话不存在</div>';
+    return;
+  }
+  
+  let html='<div class="chat-main-header"><div><div class="chat-main-info">'+(chat.username||'未知用户')+'</div><div class="chat-main-email">'+(chat.email||'')+'</div></div></div>';
+  html+='<div class="chat-messages" id="chatMessages">';
+  
+  if(chat.messages&&chat.messages.length>0){
+    chat.messages.forEach(m=>{
+      const time=new Date(m.time).toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+      if(m.sender==='user'){
+        html+='<div class="msg user"><div><div class="msg-bubble">'+m.content+'</div><div class="msg-meta">'+time+'</div></div></div>';
+      }else{
+        html+='<div class="msg agent"><div><div class="msg-agent-name">'+(m.agentName||'客服')+'</div><div class="msg-bubble">'+m.content+'</div><div class="msg-meta">'+time+'</div></div></div>';
+      }
+    });
+  }else{
+    html+='<div class="chat-empty-state">暂无消息</div>';
+  }
+  
+  html+='</div>';
+  html+='<div class="chat-input-area"><input type="text" class="chat-input" id="chatInput" placeholder="输入回复消息..." onkeydown="if(event.key===\'Enter\')sendMessage()"><button class="chat-send" onclick="sendMessage()">发送</button></div>';
+  
+  main.innerHTML=html;
+  
+  // Scroll to bottom
+  setTimeout(()=>{
+    const msgContainer=document.getElementById('chatMessages');
+    if(msgContainer)msgContainer.scrollTop=msgContainer.scrollHeight;
+  },50);
+}
+
+function sendMessage(){
+  const input=document.getElementById('chatInput');
+  const content=input.value.trim();
+  if(!content||!currentChatId)return;
+  
+  const chats=getChats();
+  const chat=chats.find(c=>c.id===currentChatId);
+  if(!chat)return;
+  
+  const msg={
+    id:Date.now(),
+    sender:'admin',
+    content:content,
+    time:new Date().toISOString(),
+    agentName:currentAgent.nickname,
+    agentId:currentAgent.id
+  };
+  
+  chat.messages=chat.messages||[];
+  chat.messages.push(msg);
+  chat.lastMessage=content;
+  chat.lastTime=msg.time;
+  chat.unreadUser=(chat.unreadUser||0)+1;
+  
+  saveChats(chats);
+  input.value='';
+  renderChatMain();
+  renderChatList();
+}
+
+// ========== Polling ==========
+let pollTimer=null;
+function startPolling(){
+  if(pollTimer)clearInterval(pollTimer);
+  pollTimer=setInterval(()=>{
+    renderChatList();
+    if(currentChatId){
+      // Check for new messages and refresh
+      const chats=getChats();
+      const chat=chats.find(c=>c.id===currentChatId);
+      if(chat&&chat.unreadAdmin>0){
+        chat.unreadAdmin=0;
+        saveChats(chats);
+        renderChatMain();
+      }
+    }
+  },3000);
+}
+
+// ========== Init ==========
+document.getElementById('csPassword').addEventListener('keydown',function(e){
+  if(e.key==='Enter')csLogin();
+});
+
+// Check if already logged in
+const savedAgent=getCurrentCS();
+if(savedAgent){
+  currentAgent=savedAgent;
+  showWorkspace();
+}
+</script>
+</body>
+</html>

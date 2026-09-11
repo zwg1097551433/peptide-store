@@ -165,7 +165,8 @@ if (typeof pdfjsLib !== 'undefined') {
     <div class="admin-nav-item" data-tab="users" onclick="switchTab('users')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>用户管理</div>
     <div class="admin-nav-item" data-tab="aboutUs" onclick="switchTab('aboutUs')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>关于我们</div><div class="admin-nav-item" data-tab="faq" onclick="switchTab('faq')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>FAQ管理</div>
     
-    <div class="admin-nav-item" data-tab="chat" onclick="switchTab('chat')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>客服管理<span id="adminChatBadge" style="display:none;background:#e74c3c;color:#fff;font-size:10px;min-width:16px;height:16px;border-radius:8px;align-items:center;justify-content:center;padding:0 4px;margin-left:4px;">0</span></div>
+    <div class="admin-nav-item" data-tab="chat" onclick="switchTab('chat')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>客服管理<span id="adminChatBadge" style="display:none;background:#e74c3c;color:#fff;font-size:10px;min-width:16px;height:16px;border-radius:8px;align-items:center;justify-content:center;padding:0 4px;margin-left:4px;">0</span></div><div class="admin-nav-item" data-tab="csAccounts" onclick="switchTab('csAccounts')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>客服账号</div>
+    
     <div class="admin-nav-item" data-tab="orders" onclick="switchTab('orders')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>订单管理</div>
     <div class="admin-nav-item" data-tab="externalOrders" onclick="switchTab('externalOrders')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>站外订单</div>
     <div class="admin-nav-item" data-tab="settings" onclick="switchTab('settings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>系统设置</div>
@@ -233,7 +234,7 @@ function logout(){if(!confirm('确定要退出登录吗？'))return;sessionStora
 if(sessionStorage.getItem('pl_admin_logged')==='1'){document.getElementById('loginScreen').style.display='none';document.getElementById('adminLayout').style.display='flex'}
 
 // ===== Tabs =====
-const TAB_TITLES = {dashboard:'数据概览',products:'产品管理',categories:'分类管理',announcements:'公告管理',coa:'COA管理',factory:'工厂内容',forum:'论坛管理',reviews:'评价管理',users:'用户管理',chat:'客服管理',aboutUs:'关于我们',faq:'FAQ管理',orders:'订单管理',externalOrders:'站外订单',settings:'系统设置'};
+const TAB_TITLES = {dashboard:'数据概览',products:'产品管理',categories:'分类管理',announcements:'公告管理',coa:'COA管理',factory:'工厂内容',forum:'论坛管理',reviews:'评价管理',users:'用户管理',chat:'客服管理',csAccounts:'客服账号',aboutUs:'关于我们',faq:'FAQ管理',orders:'订单管理',externalOrders:'站外订单',settings:'系统设置'};
 let currentTab = 'dashboard';
 function switchTab(tab){currentTab=tab;document.querySelectorAll('.admin-nav-item').forEach(n=>n.classList.toggle('active',n.dataset.tab===tab));document.getElementById('pageTitle').textContent=TAB_TITLES[tab]||tab;renderContent()}
 
@@ -322,6 +323,7 @@ function renderContent(){
   if(currentTab==='dashboard'){renderDashboard(el);return}
   if(currentTab==='users'){renderUsers(el);return}
   if(currentTab==='chat'){renderChatAdmin(el);return}
+  if(currentTab==='csAccounts'){renderCSAccounts(el);return}
   if(currentTab==='aboutUs'){renderAboutUsAdmin(el);return}
   if(currentTab==='faq'){renderFAQAdmin(el);return}
   if(currentTab==='orders'){renderOrders(el);return}
@@ -1829,6 +1831,85 @@ function resetAboutUs(){
 // ========== Customer Service Chat Admin ==========
 let currentAdminChatId = null;
 
+// ========== Customer Service Account Management ==========
+function getCSAccounts(){
+  try{
+    const accounts=JSON.parse(localStorage.getItem('pl_cs_accounts')||'null');
+    if(accounts&&Array.isArray(accounts)&&accounts.length>0)return accounts;
+  }catch(e){}
+  const defaults=[{id:1,username:'cs001',password:'123456',nickname:'客服小王',status:'active',createdAt:new Date().toISOString(),lastLogin:null}];
+  localStorage.setItem('pl_cs_accounts',JSON.stringify(defaults));
+  return defaults;
+}
+function saveCSAccounts(accounts){localStorage.setItem('pl_cs_accounts',JSON.stringify(accounts));}
+
+function renderCSAccounts(el){
+  const accounts=getCSAccounts();
+  let html='<div class="panel"><div class="panel-toolbar"><span style="font-size:16px;font-weight:600">客服账号管理 ('+accounts.length+'个)</span><button class="btn btn-primary" onclick="showAddCSForm()">+ 添加客服账号</button></div>';
+  html+='<div style="margin-bottom:16px;padding:12px;background:#e8f0fe;border-radius:8px;font-size:13px;color:#1a73e8">客服账号用于登录独立客服工作台（cs.html），只能处理客户聊天，不能管理产品/订单等。</div>';
+  if(accounts.length===0){html+='<div class="admin-empty">暂无客服账号，点击上方按钮添加</div></div>';el.innerHTML=html;return}
+  html+='<table class="data-table"><thead><tr><th>ID</th><th>账号</th><th>昵称</th><th>状态</th><th>创建时间</th><th>最后登录</th><th>操作</th></tr></thead><tbody>';
+  accounts.forEach(acc=>{
+    const statusBadge=acc.status==='active'?'<span style="color:#28a745;font-weight:600">启用</span>':'<span style="color:#6c757d;font-weight:600">禁用</span>';
+    const created=acc.createdAt?new Date(acc.createdAt).toLocaleString('zh-CN'):'-';
+    const lastLogin=acc.lastLogin?new Date(acc.lastLogin).toLocaleString('zh-CN'):'从未登录';
+    html+='<tr><td>'+acc.id+'</td><td><strong>'+acc.username+'</strong></td><td>'+acc.nickname+'</td><td>'+statusBadge+'</td><td>'+created+'</td><td>'+lastLogin+'</td>';
+    html+='<td><button class="btn btn-sm btn-secondary" onclick="editCSAccount('+acc.id+')" style="margin-right:6px">编辑</button>';
+    html+='<button class="btn btn-sm btn-warning" onclick="toggleCSStatus('+acc.id+')" style="margin-right:6px">'+(acc.status==='active'?'禁用':'启用')+'</button>';
+    html+='<button class="btn btn-sm btn-danger" onclick="deleteCSAccount('+acc.id+')">删除</button></td></tr>';
+  });
+  html+='</tbody></table></div>';
+  el.innerHTML=html;
+}
+
+function showAddCSForm(){
+  const username=prompt('请输入客服账号（如cs002）：');
+  if(!username)return;
+  const accounts=getCSAccounts();
+  if(accounts.find(a=>a.username===username)){alert('该账号已存在');return}
+  const password=prompt('请输入密码：');
+  if(!password)return;
+  const nickname=prompt('请输入客服昵称（客户看到的名字）：')||username;
+  const newId=accounts.length>0?Math.max(...accounts.map(a=>a.id))+1:1;
+  accounts.push({id:newId,username:username,password:password,nickname:nickname,status:'active',createdAt:new Date().toISOString(),lastLogin:null});
+  saveCSAccounts(accounts);
+  renderCSAccounts(document.getElementById('adminContent'));
+  showToast('客服账号添加成功！');
+}
+
+function editCSAccount(id){
+  const accounts=getCSAccounts();
+  const acc=accounts.find(a=>a.id===id);
+  if(!acc)return;
+  const nickname=prompt('修改客服昵称：',acc.nickname);
+  if(nickname===null)return;
+  const password=prompt('修改密码（留空则不修改）：');
+  acc.nickname=nickname||acc.nickname;
+  if(password)acc.password=password;
+  saveCSAccounts(accounts);
+  renderCSAccounts(document.getElementById('adminContent'));
+  showToast('修改成功！');
+}
+
+function toggleCSStatus(id){
+  const accounts=getCSAccounts();
+  const acc=accounts.find(a=>a.id===id);
+  if(!acc)return;
+  acc.status=acc.status==='active'?'disabled':'active';
+  saveCSAccounts(accounts);
+  renderCSAccounts(document.getElementById('adminContent'));
+  showToast(acc.status==='active'?'账号已启用':'账号已禁用');
+}
+
+function deleteCSAccount(id){
+  if(!confirm('确定删除该客服账号？删除后无法登录客服工作台。'))return;
+  let accounts=getCSAccounts();
+  accounts=accounts.filter(a=>a.id!==id);
+  saveCSAccounts(accounts);
+  renderCSAccounts(document.getElementById('adminContent'));
+  showToast('已删除');
+}
+
 function getAdminChats(){return JSON.parse(localStorage.getItem('pl_chats')||'[]');}
 function saveAdminChats(chats){localStorage.setItem('pl_chats',JSON.stringify(chats));}
 
@@ -1912,7 +1993,7 @@ function sendAdminMessage(){
   if(!chat)return;
   
   const msg={id:'msg_'+Date.now(),sender:'admin',content:content,time:new Date().toISOString(),read:false};
-  chat.messages.push(msg);
+  msg.agentName='管理员';msg.agentId='admin';chat.messages.push(msg);
   chat.lastMessage=content;
   chat.lastTime=msg.time;
   chat.unreadUser=(chat.unreadUser||0)+1;
