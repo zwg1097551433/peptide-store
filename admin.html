@@ -297,6 +297,23 @@ window.addEventListener('storage', function(e){
   }
 });
 
+// Periodic check for data changes (works even in same tab)
+let _lastUsersCount = -1;
+let _lastOrdersCount = -1;
+setInterval(function(){
+  try{
+    const users = JSON.parse(localStorage.getItem('pl_users')||'[]');
+    const orders = JSON.parse(localStorage.getItem('pl_orders')||'[]');
+    if(users.length !== _lastUsersCount || orders.length !== _lastOrdersCount){
+      if(_lastUsersCount >= 0 && (currentMenu === 'users' || currentMenu === 'orders')){
+        renderContent();
+      }
+      _lastUsersCount = users.length;
+      _lastOrdersCount = orders.length;
+    }
+  }catch(e){}
+}, 3000);
+
 function renderContent(){
   const el=document.getElementById('adminContent');
   if(currentTab==='dashboard'){renderDashboard(el);return}
