@@ -1612,7 +1612,7 @@ function renderUsers(el){
   let html='<div class="panel"><div class="panel-toolbar"><span style="font-size:13px;color:var(--text-muted);">共 '+users.length+' 个注册用户</span></div>';
   if(users.length===0){html+='<div class="admin-empty">暂无注册用户</div></div>';el.innerHTML=html;return}
   
-  html+='<table class="admin-table"><thead><tr><th>用户名</th><th>邮箱</th><th>注册时间</th><th>最后登录</th><th>登录IP数</th><th>浏览次数</th><th>订单数</th><th>累计消费</th><th>操作</th></tr></thead><tbody>';
+  html+='<table class="admin-table"><thead><tr><th>登录ID</th><th>昵称</th><th>邮箱</th><th>注册时间</th><th>最后登录</th><th>登录IP数</th><th>浏览次数</th><th>订单数</th><th>累计消费</th><th>操作</th></tr></thead><tbody>';
   users.forEach(u=>{
     const regDate=new Date(u.registerDate).toLocaleDateString('zh-CN');
     const lastLogin=u.lastLogin?new Date(u.lastLogin).toLocaleString('zh-CN'):'-';
@@ -1620,7 +1620,7 @@ function renderUsers(el){
     const totalViews=u.totalViews||0;
     const userOrders=orders.filter(o=>o.userId===u.id);
     const totalSpent=(u.totalSpent||0).toFixed(2);
-    html+='<tr><td><b>'+u.username+'</b></td><td>'+u.email+'</td><td>'+regDate+'</td><td>'+lastLogin+'</td>'+
+    html+='<tr><td><b>'+u.username+'</b></td><td>'+(u.nickname||u.username)+'</td><td>'+u.email+'</td><td>'+regDate+'</td><td>'+lastLogin+'</td>'+
     '<td>'+ipCount+'</td><td>'+totalViews+'</td><td>'+userOrders.length+'</td><td><b>$'+totalSpent+'</b></td>'+
     '<td><button class="btn btn-primary btn-sm" onclick="viewUserDetail(\''+u.id+'\')">详情</button> '+
     '<button class="btn btn-danger btn-sm" onclick="deleteUser(\''+u.id+'\')">删除</button></td></tr>';
@@ -1741,7 +1741,7 @@ function renderUserDetail(el){
   
   html+='<div class="panel" style="margin-bottom:16px;"><div class="panel-toolbar"><h3 style="font-size:16px;margin:0;">用户基本信息</h3></div>'+
     '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;padding:16px;">'+
-    '<div><div style="font-size:12px;color:var(--text-light);margin-bottom:4px;">用户名</div><div style="font-size:15px;font-weight:600;">'+u.username+'</div></div>'+
+    '<div><div style="font-size:12px;color:var(--text-light);margin-bottom:4px;">登录ID（账号）</div><div style="font-size:15px;font-weight:600;">'+u.username+'</div></div>'+'<div><div style="font-size:12px;color:var(--text-light);margin-bottom:4px;">昵称</div><div style="font-size:15px;font-weight:600;color:var(--primary);">'+(u.nickname||u.username)+'</div></div>'+
     '<div><div style="font-size:12px;color:var(--text-light);margin-bottom:4px;">邮箱</div><div style="font-size:15px;">'+u.email+'</div></div>'+
     '<div><div style="font-size:12px;color:var(--text-light);margin-bottom:4px;">密码</div><div style="font-size:15px;font-family:monospace;">'+u.password+'</div></div>'+
     '<div><div style="font-size:12px;color:var(--text-light);margin-bottom:4px;">注册时间</div><div style="font-size:15px;">'+new Date(u.registerDate).toLocaleString('zh-CN')+'</div></div>'+
