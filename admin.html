@@ -287,6 +287,16 @@ const ENTITY_CONFIG = {
 };
 
 // ===== Render =====
+// Auto-sync with frontend: listen for localStorage changes
+window.addEventListener('storage', function(e){
+  if(e.key === 'pl_users' || e.key === 'pl_orders' || e.key === 'pl_forum' || e.key === 'pl_reviews'){
+    if(currentMenu === 'users' || currentMenu === 'orders' || currentMenu === 'forum' || currentMenu === 'reviews'){
+      renderContent();
+      showToast('数据已自动同步');
+    }
+  }
+});
+
 function renderContent(){
   const el=document.getElementById('adminContent');
   if(currentTab==='dashboard'){renderDashboard(el);return}
@@ -1609,7 +1619,7 @@ function renderUsers(el){
   const users=JSON.parse(localStorage.getItem('pl_users')||'[]');
   const orders=JSON.parse(localStorage.getItem('pl_orders')||'[]');
   
-  let html='<div class="panel"><div class="panel-toolbar"><span style="font-size:13px;color:var(--text-muted);">共 '+users.length+' 个注册用户</span></div>';
+  let html='<div class="panel"><div class="panel-toolbar"><span style="font-size:13px;color:var(--text-muted);">共 '+users.length+' 个注册用户</span><button class="btn btn-sm btn-secondary" onclick="renderContent()" style="margin-left:auto;">刷新数据</button></div>';
   if(users.length===0){html+='<div class="admin-empty">暂无注册用户</div></div>';el.innerHTML=html;return}
   
   html+='<table class="admin-table"><thead><tr><th>登录ID</th><th>昵称</th><th>邮箱</th><th>注册时间</th><th>最后登录</th><th>登录IP数</th><th>浏览次数</th><th>订单数</th><th>累计消费</th><th>操作</th></tr></thead><tbody>';
