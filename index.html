@@ -287,6 +287,11 @@ ul{list-style:none}
 .forum-header h2{font-family:var(--font-display);font-size:24px}
 .forum-new-btn{padding:10px 20px;background:var(--primary);color:#fff;border-radius:var(--radius-sm);font-weight:600;font-size:14px;display:flex;align-items:center;gap:6px}
 .forum-new-btn:hover{background:var(--primary-dark)}
+.forum-sort-tabs{display:flex;gap:8px;margin-right:auto;margin-left:16px}
+.forum-sort-btn{padding:6px 14px;border:1px solid var(--border);border-radius:16px;background:var(--surface);color:var(--text-muted);font-size:13px;cursor:pointer;transition:all .2s;font-weight:500}
+.forum-sort-btn:hover{border-color:var(--primary);color:var(--primary)}
+.forum-sort-btn.active{background:var(--primary);color:#fff;border-color:var(--primary);font-weight:600}
+
 .forum-list{display:flex;flex-direction:column;gap:10px}
 .forum-post-card{background:var(--surface);border:1px solid var(--border-light);border-radius:var(--radius);padding:18px 20px;cursor:pointer;transition:all .2s}
 .forum-post-card:hover{border-color:var(--primary-light);box-shadow:var(--shadow-sm)}
@@ -544,6 +549,11 @@ body{padding-bottom:64px}
   <div class="forum-page">
     <div id="forumList-view">
       <div class="forum-header"><h2 data-i18n="forum.title">Community Forum</h2>
+<div class="forum-sort-tabs">
+<button class="forum-sort-btn active" onclick="setForumSort('hot')">🔥 Hot</button>
+<button class="forum-sort-btn" onclick="setForumSort('likes')">❤️ Most Liked</button>
+<button class="forum-sort-btn" onclick="setForumSort('new')">🆕 Newest</button>
+</div>
       <button class="forum-new-btn" onclick="showNewPostForm()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span data-i18n="forum.newPost">New Post</span></button></div>
       <div class="forum-list" id="forumFullList"></div>
     </div>
@@ -890,14 +900,32 @@ function navigateToProductByName(name){
   else{showToast('Product not found');}
 }
 function renderForumPreview(){document.getElementById('forumPreview').innerHTML=FORUM_POSTS.slice(0,5).map((p,i)=>'<div class="forum-item" onclick="openForumPost('+p.id+')"><div class="forum-num">'+String(i+1).padStart(2,'0')+'</div><div class="forum-info"><div class="forum-title">'+p.title+'</div><div class="forum-meta">'+p.author+' · '+p.date+' · '+(p.comments?p.comments.length:p.replies||0)+' replies</div></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;color:var(--text-light);"><polyline points="9 18 15 12 9 6"/></svg></div>').join('')}
+let forumSort='hot';
+function setForumSort(sort){
+  forumSort=sort;
+  document.querySelectorAll('.forum-sort-btn').forEach((btn,i)=>{
+    btn.classList.toggle('active',(sort==='hot'&&i===0)||(sort==='likes'&&i===1)||(sort==='new'&&i===2));
+  });
+  renderForumList();
+}
+function getHotScore(p){
+  const replies=p.comments?p.comments.length:(p.replies||0);
+  const views=p.views||0;
+  const likes=p.likes||0;
+  return replies*3+views*0.1+likes*2;
+}
 function renderForumList(){
   const list=document.getElementById('forumFullList');
   if(!list)return;
-  list.innerHTML=FORUM_POSTS.map(p=>{
+  let sorted=[...FORUM_POSTS];
+  if(forumSort==='hot'){sorted.sort((a,b)=>getHotScore(b)-getHotScore(a));}
+  else if(forumSort==='likes'){sorted.sort((a,b)=>(b.likes||0)-(a.likes||0));}
+  else if(forumSort==='new'){sorted.sort((a,b)=>new Date(b.date)-new Date(a.date));}
+  list.innerHTML=sorted.map(p=>{
     const replyCount=p.comments?p.comments.length:(p.replies||0);
     const lastComment=p.comments&&p.comments.length>0?p.comments[p.comments.length-1]:null;
     const liked=p.likedBy&&currentUser&&p.likedBy.includes(currentUser.id);
-    return '<div class="forum-post-card"><div class="forum-post-title" onclick="openForumPost('+p.id+')">'+p.title+'</div><div class="forum-post-excerpt" onclick="openForumPost('+p.id+')">'+p.excerpt+'</div><div class="forum-post-footer"><span>👤 '+p.author+'</span><span>📅 '+p.date+'</span><span>💬 '+replyCount+' replies</span><span>👁️ '+(p.views||0)+' views</span><span class="like-btn '+(liked?'liked':'')+'" onclick="event.stopPropagation();togglePostLike('+p.id+')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>'+(p.likes||0)+'</span>'+(lastComment?'<span style="margin-left:auto;color:var(--text-muted)">Last: '+lastComment.username+' · '+lastComment.date+'</span>':'')+'</div></div>';
+    const hotScore=getHotScore(p).toFixed(0);return '<div class="forum-post-card"><div class="forum-post-title" onclick="openForumPost('+p.id+')">'+p.title+(forumSort==='hot'?'<span style="margin-left:8px;font-size:11px;color:#ff6b35;font-weight:600">🔥 Hot Score: '+hotScore+'</span>':'')+'</div><div class="forum-post-excerpt" onclick="openForumPost('+p.id+')">'+p.excerpt+'</div><div class="forum-post-footer"><span>👤 '+p.author+'</span><span>📅 '+p.date+'</span><span>💬 '+replyCount+' replies</span><span>👁️ '+(p.views||0)+' views</span><span class="like-btn '+(liked?'liked':'')+'" onclick="event.stopPropagation();togglePostLike('+p.id+')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>'+(p.likes||0)+'</span>'+(lastComment?'<span style="margin-left:auto;color:var(--text-muted)">Last: '+lastComment.username+' · '+lastComment.date+'</span>':'')+'</div></div>';
   }).join('');
 }
 function openForumPost(id){
