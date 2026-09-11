@@ -63,6 +63,18 @@ input,select,textarea{font-family:inherit;font-size:14px}
   .user-suggest-item .uname{font-weight:600}
   .user-suggest-item .uemail{color:#999;font-size:11px}
 .admin-table td{padding:10px 12px;border-bottom:1px solid var(--border-light);vertical-align:top}
+.coa-batch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.coa-batch-card{background:var(--surface);border:1px solid var(--border-light);border-radius:8px;padding:18px}
+.coa-batch-card h4{font-size:16px;margin-bottom:6px;color:var(--primary)}
+.coa-batch-meta{font-size:12px;color:var(--text-muted);margin-bottom:12px}
+.coa-batch-thumbs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.coa-batch-thumb{width:50px;height:50px;object-fit:cover;border-radius:4px;border:1px solid var(--border)}
+.coa-batch-actions{display:flex;gap:8px}
+.coa-image-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:16px}
+.coa-image-item{position:relative;border:1px solid var(--border-light);border-radius:6px;overflow:hidden}
+.coa-image-item img{width:100%;height:120px;object-fit:cover;display:block}
+.coa-image-item .coa-img-name{padding:6px;font-size:11px;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.coa-image-item .coa-img-del{position:absolute;top:4px;right:4px;background:rgba(220,53,69,.9);color:#fff;border:none;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:14px;line-height:1}
 .admin-table tr:hover td{background:var(--bg)}
 .admin-empty{text-align:center;padding:40px;color:var(--text-light);font-size:14px}
 
@@ -184,7 +196,9 @@ let PRODUCTS = Store.get('products', DEFAULT_PRODUCTS);
 let ANNOUNCEMENTS = Store.get('announcements', DEFAULT_ANNOUNCEMENTS);
 let FORUM_POSTS = Store.get('forum', DEFAULT_FORUM);
 let REVIEWS = Store.get('reviews', DEFAULT_REVIEWS);
-let COA_RECORDS = Store.get('coa', DEFAULT_COA);
+let COA_RECORDS = Store.get('coa', []);
+// Migrate old COA format to new batch format
+(function(){let migrated=false;COA_RECORDS=COA_RECORDS.map(c=>{if(c.batch&&!c.batchNumber){migrated=true;return{id:c.id||('coa_'+Date.now()),batchNumber:c.batch,date:c.date||'',products:c.product||'',images:c.image?[{id:'img_'+Date.now(),name:'COA Report',data:c.image}]:[]}}return c});if(migrated){Store.set('coa',COA_RECORDS)}})();
 let FACTORY_ITEMS = Store.get('factory', DEFAULT_FACTORY);
 
 function saveData(type){if(type==='products')Store.set('products',PRODUCTS);if(type==='categories')Store.set('categories',CATEGORIES);if(type==='announcements')Store.set('announcements',ANNOUNCEMENTS);if(type==='forum')Store.set('forum',FORUM_POSTS);if(type==='reviews')Store.set('reviews',REVIEWS);if(type==='coa')Store.set('coa',COA_RECORDS);if(type==='factory')Store.set('factory',FACTORY_ITEMS)}
@@ -261,6 +275,7 @@ function renderContent(){
   if(currentTab==='orders'){renderOrders(el);return}
   if(currentTab==='externalOrders'){renderExternalOrders(el);return}
   if(currentTab==='settings'){renderSettings(el);return}
+  if(currentTab==='coa'){renderCOAManager(el);return}
   const cfg=ENTITY_CONFIG[currentTab];
   if(!cfg){el.innerHTML='<div class="admin-empty">请选择菜单</div>';return}
   const items=cfg.list();
@@ -287,6 +302,97 @@ function renderContent(){
   el.innerHTML=html;
 }
 
+let currentEditingCOABatch=null;
+function renderCOAManager(el){
+  let html='<div class="panel"><div class="panel-toolbar"><span style="font-size:13px;color:var(--text-muted);">共 '+COA_RECORDS.length+' 个批次</span><button class="btn btn-primary" onclick="openCOABatchForm(null)">+ 新建批次</button></div>';
+  if(COA_RECORDS.length===0){html+='<div class="admin-empty">暂无COA批次，点击上方按钮新建</div></div>';el.innerHTML=html;return}
+  html+='<div class="coa-batch-grid">';
+  COA_RECORDS.forEach(b=>{
+    const imgs=b.images||[];
+    const thumbs=imgs.slice(0,4).map(i=>'<img src="'+i.data+'" class="coa-batch-thumb">').join('');
+    html+='<div class="coa-batch-card"><h4>'+b.batchNumber+'</h4><div class="coa-batch-meta">'+b.date+' · '+(b.products||'')+' · '+imgs.length+'张报告</div><div class="coa-batch-thumbs">'+thumbs+(imgs.length>4?'<span style="font-size:12px;color:var(--text-muted);align-self:center;">+'+(imgs.length-4)+'</span>':'')+'</div><div class="coa-batch-actions"><button class="btn btn-primary btn-sm" onclick="openCOABatchForm(\''+b.id+'\')">管理图片</button><button class="btn btn-danger btn-sm" onclick="deleteCOABatch(\''+b.id+'\')">删除批次</button></div></div>';
+  });
+  html+='</div></div>';
+  el.innerHTML=html;
+}
+function openCOABatchForm(batchId){
+  currentEditingCOABatch=batchId?COA_RECORDS.find(b=>b.id===batchId):null;
+  const isEdit=!!currentEditingCOABatch;
+  const b=currentEditingCOABatch||{batchNumber:'',date:new Date().toISOString().split('T')[0],products:'',images:[]};
+  let html='<div class="panel"><h3 style="margin-bottom:16px;">'+(isEdit?'管理批次: '+b.batchNumber:'新建COA批次')+'</h3>';
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">';
+  html+='<div><label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">批号 *</label><input type="text" id="coaBatchNum" value="'+b.batchNumber+'" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;" placeholder="如 20260818"></div>';
+  html+='<div><label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">检测日期</label><input type="date" id="coaBatchDate" value="'+b.date+'" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;"></div>';
+  html+='<div style="grid-column:1/-1;"><label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">包含产品</label><input type="text" id="coaBatchProducts" value="'+(b.products||'')+'" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;" placeholder="如 Tirzepatide, Semaglutide"></div>';
+  html+='</div>';
+  if(isEdit){
+    html+='<div style="margin-bottom:16px;"><label style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;">上传COA报告图片（可多选）</label><input type="file" id="coaImageUpload" accept="image/*" multiple style="margin-bottom:12px;"><button class="btn btn-primary btn-sm" onclick="uploadCOAImages()">上传图片</button></div>';
+    const imgs=b.images||[];
+    if(imgs.length>0){
+      html+='<h4 style="margin-bottom:12px;font-size:14px;">已上传图片 ('+imgs.length+')</h4><div class="coa-image-list">';
+      imgs.forEach((img,idx)=>{
+        html+='<div class="coa-image-item"><img src="'+img.data+'" alt="'+img.name+'"><div class="coa-img-name">'+img.name+'</div><button class="coa-img-del" onclick="deleteCOAImage('+idx+')">&times;</button></div>';
+      });
+      html+='</div>';
+    }
+  }
+  html+='<div style="margin-top:24px;display:flex;gap:12px;">';
+  html+='<button class="btn btn-primary" onclick="saveCOABatch()">'+(isEdit?'保存批次信息':'创建批次')+'</button>';
+  html+='<button class="btn btn-secondary" onclick="switchTab(\'coa\')">返回列表</button>';
+  html+='</div></div>';
+  document.getElementById('adminContent').innerHTML=html;
+}
+function saveCOABatch(){
+  const batchNumber=document.getElementById('coaBatchNum').value.trim();
+  const date=document.getElementById('coaBatchDate').value;
+  const products=document.getElementById('coaBatchProducts').value.trim();
+  if(!batchNumber){showToast('请输入批号');return}
+  if(currentEditingCOABatch){
+    currentEditingCOABatch.batchNumber=batchNumber;
+    currentEditingCOABatch.date=date;
+    currentEditingCOABatch.products=products;
+  }else{
+    const newBatch={id:'coa_'+Date.now(),batchNumber,date,products,images:[]};
+    COA_RECORDS.push(newBatch);
+    currentEditingCOABatch=newBatch;
+  }
+  saveData('coa');
+  showToast('批次已保存');
+  openCOABatchForm(currentEditingCOABatch.id);
+}
+function uploadCOAImages(){
+  const input=document.getElementById('coaImageUpload');
+  if(!input.files||input.files.length===0){showToast('请选择图片');return}
+  let uploaded=0;
+  Array.from(input.files).forEach(file=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      if(!currentEditingCOABatch.images)currentEditingCOABatch.images=[];
+      currentEditingCOABatch.images.push({id:'img_'+Date.now()+'_'+Math.random().toString(36).substr(2,5),name:file.name,data:e.target.result});
+      uploaded++;
+      if(uploaded===input.files.length){
+        saveData('coa');
+        showToast('已上传 '+uploaded+' 张图片');
+        openCOABatchForm(currentEditingCOABatch.id);
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+}
+function deleteCOAImage(idx){
+  if(!confirm('确定删除这张COA报告图片？'))return;
+  currentEditingCOABatch.images.splice(idx,1);
+  saveData('coa');
+  showToast('图片已删除');
+  openCOABatchForm(currentEditingCOABatch.id);
+}
+function deleteCOABatch(batchId){
+  if(!confirm('确定删除此批次及其所有COA报告？此操作不可撤销！'))return;
+  COA_RECORDS=COA_RECORDS.filter(b=>b.id!==batchId);
+  saveData('coa');
+  showToast('批次已删除');
+  renderCOAManager(document.getElementById('adminContent'));
+}
 function renderDashboard(el){
   const orders=Store.get('orders',[]);
   const totalRev=orders.reduce((s,o)=>s+o.total,0);

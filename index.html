@@ -136,6 +136,22 @@ ul{list-style:none}
 .coa-info h4{font-size:14px;font-weight:600;margin-bottom:2px}
 .coa-info p{font-size:12px;color:var(--text-light)}
 .coa-verify-btn{padding:6px 14px;background:var(--primary-bg);color:var(--primary);border-radius:var(--radius-sm);font-size:12px;font-weight:600}
+.coa-batch-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.coa-batch-card{background:var(--surface);border:1px solid var(--border-light);border-radius:var(--radius);padding:20px;cursor:pointer;transition:all .2s}
+.coa-batch-card:hover{border-color:var(--primary);box-shadow:var(--shadow-md);transform:translateY(-2px)}
+.coa-batch-number{font-size:18px;font-weight:700;color:var(--primary);margin-bottom:6px}
+.coa-batch-meta{font-size:13px;color:var(--text-muted);margin-bottom:8px}
+.coa-batch-count{display:inline-block;background:var(--primary-bg);color:var(--primary);padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600}
+.coa-detail-header{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.coa-back-btn{padding:8px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-size:13px;font-weight:600}
+.coa-images-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+.coa-image-card{background:var(--surface);border:1px solid var(--border-light);border-radius:var(--radius-sm);overflow:hidden;cursor:pointer;transition:all .2s}
+.coa-image-card:hover{border-color:var(--primary);box-shadow:var(--shadow-md)}
+.coa-image-card img{width:100%;height:180px;object-fit:cover;display:block}
+.coa-image-name{padding:10px;font-size:12px;color:var(--text-muted);text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.coa-image-viewer{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.9);z-index:1000;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.coa-image-viewer img{max-width:90%;max-height:90%;object-fit:contain}
+.coa-image-viewer-close{position:absolute;top:20px;right:30px;color:#fff;font-size:36px;cursor:pointer}
 .section-title{font-family:var(--font-display);font-size:20px;font-weight:700;margin:36px 0 16px;display:flex;align-items:center;gap:8px}
 .section-title::after{content:'';flex:1;height:1px;background:var(--border)}
 .reviews-scroll{display:flex;gap:14px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory}
@@ -670,7 +686,8 @@ let PRODUCTS = Store.get('products', DEFAULT_PRODUCTS);
 let ANNOUNCEMENTS = Store.get('announcements', DEFAULT_ANNOUNCEMENTS);
 let FORUM_POSTS = Store.get('forum', DEFAULT_FORUM);
 let REVIEWS = Store.get('reviews', DEFAULT_REVIEWS);
-let COA_RECORDS = Store.get('coa', DEFAULT_COA);
+let COA_RECORDS = Store.get('coa', []);
+(function(){let migrated=false;COA_RECORDS=COA_RECORDS.map(c=>{if(c.batch&&!c.batchNumber){migrated=true;return{id:c.id||('coa_'+Date.now()),batchNumber:c.batch,date:c.date||'',products:c.product||'',images:c.image?[{id:'img_'+Date.now(),name:'COA Report',data:c.image}]:[]}}return c});if(migrated){Store.set('coa',COA_RECORDS)}})();
 let FACTORY_ITEMS = Store.get('factory', DEFAULT_FACTORY);
 
 const I18N = {
@@ -761,8 +778,12 @@ function playFactoryVideo(id){const f=FACTORY_ITEMS.find(x=>String(x.id)===Strin
 function closeVideoModal(){const v=document.getElementById('factoryVideoPlayer');v.pause();v.src='';document.getElementById('videoModal').classList.remove('open')}
 function openImageViewer(id){const f=FACTORY_ITEMS.find(x=>String(x.id)===String(id));if(!f||!f.image)return;document.getElementById('imageViewerImg').src=f.image;document.getElementById('imageViewerTitle').textContent=f.title+(f.date?' · '+f.date:'');document.getElementById('imageViewer').classList.add('open')}
 function closeImageViewer(){document.getElementById('imageViewer').classList.remove('open');document.getElementById('imageViewerImg').src=''}
-function renderCOA(){const el=document.getElementById('coaContent');if(COA_RECORDS.length===0){el.innerHTML='<div class="placeholder-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg><h3>COA Verification</h3><p>COA records coming soon.</p></div>';return}el.innerHTML='<div style="max-width:500px;margin:0 auto 20px;display:flex;gap:8px;"><input type="text" id="coaSearchInput" placeholder="Enter batch number to verify..." style="flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);outline:none;"><button onclick="verifyCOA()" style="padding:10px 18px;background:var(--primary);color:#fff;border-radius:var(--radius-sm);font-weight:600;font-size:13px;">Verify</button></div><div class="coa-list">'+COA_RECORDS.map(c=>'<div class="coa-item"><div class="coa-info"><h4>Batch: '+c.batch+'</h4><p>'+c.product+' · Purity '+c.purity+' · '+c.date+'</p></div><button class="coa-verify-btn" onclick="showToast(\'COA: '+c.note+'\')">View COA</button></div>').join('')+'</div>'}
-function verifyCOA(){const q=document.getElementById('coaSearchInput').value.trim();if(!q)return;const f=COA_RECORDS.find(c=>c.batch.toLowerCase()===q.toLowerCase());showToast(f?'Verified: '+f.product+' ('+f.purity+')':'Batch not found: '+q)}
+function renderCOA(){const el=document.getElementById('coaContent');if(COA_RECORDS.length===0){el.innerHTML='<div class=\"placeholder-panel\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"><path d=\"M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z\"/></svg><h3>COA Verification</h3><p>COA records coming soon.</p></div>';return}el.innerHTML='<h3 style=\"margin-bottom:16px;font-size:18px;\">COA Reports by Batch</h3><div class=\"coa-batch-list\">'+COA_RECORDS.map(b=>'<div class=\"coa-batch-card\" onclick=\"viewCOABatch(\''+b.id+'\')\"><div class=\"coa-batch-number\">'+b.batchNumber+'</div><div class=\"coa-batch-meta\">'+b.date+' · '+(b.products||'Multiple products')+'</div><span class=\"coa-batch-count\">'+(b.images?b.images.length:0)+' reports</span></div>').join('')+'</div>'}
+let currentCOABatch=null;
+function viewCOABatch(batchId){currentCOABatch=COA_RECORDS.find(b=>b.id===batchId);if(!currentCOABatch)return;const el=document.getElementById('coaContent');const images=currentCOABatch.images||[];el.innerHTML='<div class=\"coa-detail-header\"><button class=\"coa-back-btn\" onclick=\"renderCOA()\">&larr; Back to Batches</button><div><h3 style=\"font-size:20px;margin:0;\">Batch: '+currentCOABatch.batchNumber+'</h3><p style=\"font-size:13px;color:var(--text-muted);margin:4px 0 0;\">'+currentCOABatch.date+' · '+(currentCOABatch.products||'')+'</p></div></div>';if(images.length===0){el.innerHTML+='<div class=\"placeholder-panel\"><p>No COA reports for this batch yet.</p></div>';return}el.innerHTML+='<div class=\"coa-images-grid\">'+images.map((img,i)=>'<div class=\"coa-image-card\" onclick=\"openCOAImage('+i+')\"><img src=\"'+img.data+'\" alt=\"'+img.name+'\"><div class=\"coa-image-name\">'+img.name+'</div></div>').join('')+'</div>'}
+function openCOAImage(idx){const img=currentCOABatch.images[idx];document.getElementById('coaViewerImg').src=img.data;document.getElementById('coaImageViewer').style.display='flex'}
+function closeCOAImage(){document.getElementById('coaImageViewer').style.display='none'}
+function verifyCOA(){const q=document.getElementById('coaSearchInput').value.trim();if(!q)return;const f=COA_RECORDS.find(c=>c.batchNumber.toLowerCase()===q.toLowerCase());if(f){viewCOABatch(f.id)}else{showToast('Batch not found: '+q)}}
 function quickAdd(id){addToCart(id,0)}
 function addToCart(pid,si){const p=PRODUCTS.find(pr=>pr.id===pid);const spec=p.specs[si];const key=pid+'_'+si;const ex=cart.find(c=>c.key===key);if(ex)ex.qty++;else cart.push({key,productId:pid,specIndex:si,name:p.name,spec:spec.label,price:spec.price,qty:1});Store.set('cart',cart);renderCart();showToast(t('added')+': '+p.name+' '+spec.label)}
 function removeFromCart(key){cart=cart.filter(c=>c.key!==key);Store.set('cart',cart);renderCart()}
@@ -1444,5 +1465,9 @@ setTimeout(updateUserUI, 100);
 
 
 </script>
+<div id="coaImageViewer" class="coa-image-viewer" style="display:none;" onclick="closeCOAImage()">
+  <span class="coa-image-viewer-close">&times;</span>
+  <img id="coaViewerImg" src="" alt="COA Report">
+</div>
 </body>
 </html>
