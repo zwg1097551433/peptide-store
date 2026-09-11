@@ -305,6 +305,26 @@ ul{list-style:none}
 .comment-user{font-size:13px;font-weight:600}
 .comment-time{font-size:11px;color:var(--text-light)}
 .comment-text{font-size:13px;color:var(--text-muted);margin-top:4px}.comment-form{margin-top:20px;padding:16px;background:var(--bg);border-radius:8px}.comment-textarea{width:100%;min-height:80px;padding:12px;border:1px solid var(--border);border-radius:6px;font-size:14px;resize:vertical;font-family:inherit;margin-bottom:10px;box-sizing:border-box}.comment-submit-btn{background:var(--primary);color:#fff;border:none;padding:8px 20px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:600}.comment-submit-btn:hover{background:var(--primary-dark)}.post-content{font-size:15px;line-height:1.8;color:var(--text);margin:16px 0;padding:16px;background:var(--bg);border-radius:8px}.post-meta{display:flex;gap:16px;font-size:13px;color:var(--text-muted);margin-bottom:8px;flex-wrap:wrap}.comments-section{margin-top:24px}.comments-section h4{font-size:16px;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.like-btn{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border:1px solid var(--border);border-radius:12px;cursor:pointer;font-size:12px;color:var(--text-muted);background:var(--surface);transition:all .2s;user-select:none}
+.like-btn:hover{border-color:var(--primary);color:var(--primary)}
+.like-btn.liked{background:#ffebee;border-color:#f44336;color:#f44336}
+.like-btn.liked svg{fill:#f44336}
+.comment-images{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.comment-images img{width:80px;height:80px;object-fit:cover;border-radius:4px;cursor:pointer;border:1px solid var(--border)}
+.comment-toolbar{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+.comment-upload-btn{display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border:1px solid var(--border);border-radius:4px;cursor:pointer;font-size:12px;color:var(--text-muted);background:var(--surface);transition:all .2s}
+.comment-upload-btn:hover{border-color:var(--primary);color:var(--primary)}
+.comment-emoji-wrap{position:relative}
+.comment-emoji-picker{position:absolute;bottom:calc(100% + 8px);left:0;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:100;display:none;width:240px;max-height:200px;overflow-y:auto}
+.comment-emoji-picker.show{display:block}
+.comment-emoji-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:2px}
+.comment-emoji-item{font-size:16px;padding:4px;cursor:pointer;border-radius:4px;text-align:center}
+.comment-emoji-item:hover{background:var(--bg)}
+.comment-img-preview{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.comment-img-preview img{width:50px;height:50px;object-fit:cover;border-radius:4px;border:1px solid var(--border)}
+.comment-img-preview span{position:relative;display:inline-block}
+.comment-img-preview .remove-img{position:absolute;top:-5px;right:-5px;background:#dc3545;color:#fff;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center;font-size:10px;cursor:pointer}
+
 .back-btn{display:inline-flex;align-items:center;gap:6px;color:var(--text-muted);font-size:14px;margin-bottom:16px;cursor:pointer}
 .back-btn:hover{color:var(--primary)}
 .checkout-page{max-width:800px;margin:0 auto;padding:28px 24px}
@@ -708,11 +728,11 @@ const DEFAULT_ANNOUNCEMENTS = [
   {id:3,date:'2026-08-28',title:'COA verification system now live',body:'Enter your batch number in the COA tab to view the full certificate of analysis.'}
 ];
 const DEFAULT_FORUM = [
-{id:1,title:'How to store peptides properly?',author:'Researcher101',userId:'demo1',date:'2026-08-10',excerpt:'Best practices for storing lyophilized peptides...',content:'I have been storing my peptides in the refrigerator. Is this the best way? Should I freeze them? What is the shelf life once reconstituted?',views:156,replies:3,comments:[{id:'c1',userId:'demo2',username:'BioChem_Mike',content:'I store lyophilized peptides at -20C and they last for years. Once reconstituted, keep at 4C and use within 2 weeks.',date:'2026-08-11'},{id:'c2',userId:'demo3',username:'LabTech_Sarah',content:'Freeze-thaw cycles degrade peptides. Aliquot before freezing to avoid repeated thawing.',date:'2026-08-12'},{id:'c3',userId:'demo4',username:'PhD_Researcher',content:'Also avoid direct light. Amber vials help protect from UV degradation.',date:'2026-08-15'}]},
-{id:2,title:'Tirzepatide vs Semaglutide for weight loss',author:'FitnessPro',userId:'demo2',date:'2026-08-15',excerpt:'Comparing the two GLP-1 agonists...',content:'Has anyone tried both? What are the main differences in side effects and efficacy? I am considering switching from Semaglutide to Tirzepatide.',views:289,replies:5,comments:[{id:'c4',userId:'demo5',username:'HealthCoach_John',content:'Tirzepatide targets both GIP and GLP-1 receptors, generally shows better weight loss results in clinical trials.',date:'2026-08-16'},{id:'c5',userId:'demo6',username:'Wellness_Amy',content:'I switched 3 months ago. Less nausea with Tirzepatide for me, and lost 8kg more.',date:'2026-08-18'}]},
-{id:3,title:'BPC-157 healing experience分享',author:'RecoveryFan',userId:'demo3',date:'2026-08-20',excerpt:'My personal experience with BPC-157 for tendon repair...',content:'I had a rotator cuff injury for 6 months. Started BPC-157 250mcg daily subQ. After 4 weeks, pain reduced by 70%. Anyone else had similar results?',views:198,replies:4,comments:[{id:'c6',userId:'demo7',username:'Athlete_Mark',content:'Same experience here. Combined with physical therapy, my elbow tendonitis resolved in 6 weeks.',date:'2026-08-21'}]},
-{id:4,title:'COA verification guide',author:'QualityFirst',userId:'demo4',date:'2026-09-01',excerpt:'How to verify Certificate of Analysis...',content:'Always ask for COA before purchasing. Check for HPLC purity >98%, mass spec confirmation, and endotoxin levels. A reputable supplier will provide these.',views:412,replies:2,comments:[{id:'c7',userId:'demo8',username:'LabManager_Tom',content:'Also verify the batch number matches your product. Some suppliers show generic COAs not matching actual batch.',date:'2026-09-02'}]},
-{id:5,title:'Shipping to Europe - customs experience',author:'EU_Buyer',userId:'demo5',date:'2026-09-05',excerpt:'Customs clearance tips for EU customers...',content:'What is everyone experience with shipping peptides to Germany/France? Any customs issues? How long does delivery usually take?',views:167,replies:1,comments:[]}
+{id:1,title:'How to store peptides properly?',author:'Researcher101',userId:'demo1',date:'2026-08-10',excerpt:'Best practices for storing lyophilized peptides...',content:'I have been storing my peptides in the refrigerator. Is this the best way? Should I freeze them? What is the shelf life once reconstituted?',views:156,likes:12,likedBy:[],comments:[{id:'c1',userId:'demo2',username:'BioChem_Mike',content:'I store lyophilized peptides at -20C and they last for years. Once reconstituted, keep at 4C and use within 2 weeks.',date:'2026-08-11',likes:5,likedBy:[],images:[]},{id:'c2',userId:'demo3',username:'LabTech_Sarah',content:'Freeze-thaw cycles degrade peptides. Aliquot before freezing to avoid repeated thawing.',date:'2026-08-12',likes:3,likedBy:[],images:[]},{id:'c3',userId:'demo4',username:'PhD_Researcher',content:'Also avoid direct light. Amber vials help protect from UV degradation.',date:'2026-08-15',likes:8,likedBy:[],images:[]}]},
+{id:2,title:'Tirzepatide vs Semaglutide for weight loss',author:'FitnessPro',userId:'demo2',date:'2026-08-15',excerpt:'Comparing the two GLP-1 agonists...',content:'Has anyone tried both? What are the main differences in side effects and efficacy? I am considering switching from Semaglutide to Tirzepatide.',views:289,likes:25,likedBy:[],comments:[{id:'c4',userId:'demo5',username:'HealthCoach_John',content:'Tirzepatide targets both GIP and GLP-1 receptors, generally shows better weight loss results in clinical trials.',date:'2026-08-16',likes:10,likedBy:[],images:[]},{id:'c5',userId:'demo6',username:'Wellness_Amy',content:'I switched 3 months ago. Less nausea with Tirzepatide for me, and lost 8kg more.',date:'2026-08-18',likes:7,likedBy:[],images:[]}]},
+{id:3,title:'BPC-157 healing experience分享',author:'RecoveryFan',userId:'demo3',date:'2026-08-20',excerpt:'My personal experience with BPC-157 for tendon repair...',content:'I had a rotator cuff injury for 6 months. Started BPC-157 250mcg daily subQ. After 4 weeks, pain reduced by 70%. Anyone else had similar results?',views:198,likes:18,likedBy:[],comments:[{id:'c6',userId:'demo7',username:'Athlete_Mark',content:'Same experience here. Combined with physical therapy, my elbow tendonitis resolved in 6 weeks.',date:'2026-08-21',likes:6,likedBy:[],images:[]}]},
+{id:4,title:'COA verification guide',author:'QualityFirst',userId:'demo4',date:'2026-09-01',excerpt:'How to verify Certificate of Analysis...',content:'Always ask for COA before purchasing. Check for HPLC purity >98%, mass spec confirmation, and endotoxin levels. A reputable supplier will provide these.',views:412,likes:32,likedBy:[],comments:[{id:'c7',userId:'demo8',username:'LabManager_Tom',content:'Also verify the batch number matches your product. Some suppliers show generic COAs not matching actual batch.',date:'2026-09-02',likes:15,likedBy:[],images:[]}]},
+{id:5,title:'Shipping to Europe - customs experience',author:'EU_Buyer',userId:'demo5',date:'2026-09-05',excerpt:'Customs clearance tips for EU customers...',content:'What is everyone experience with shipping peptides to Germany/France? Any customs issues? How long does delivery usually take?',views:167,likes:9,likedBy:[],comments:[]}
 ];
 const DEFAULT_REVIEWS = [
   {id:'rev_1',productId:'',productName:'Tirzepatide',userId:'demo1',username:'John D.',rating:5,content:'Excellent quality! Fast shipping to USA. Will order again. 👍',images:[],date:'2026-08-15'},
@@ -876,27 +896,35 @@ function renderForumList(){
   list.innerHTML=FORUM_POSTS.map(p=>{
     const replyCount=p.comments?p.comments.length:(p.replies||0);
     const lastComment=p.comments&&p.comments.length>0?p.comments[p.comments.length-1]:null;
-    return '<div class="forum-post-card" onclick="openForumPost('+p.id+')"><div class="forum-post-title">'+p.title+'</div><div class="forum-post-excerpt">'+p.excerpt+'</div><div class="forum-post-footer"><span>👤 '+p.author+'</span><span>📅 '+p.date+'</span><span>💬 '+replyCount+' replies</span><span>👁️ '+(p.views||0)+' views</span>'+(lastComment?'<span style="margin-left:auto;color:var(--text-muted)">Last: '+lastComment.username+' · '+lastComment.date+'</span>':'')+'</div></div>';
+    const liked=p.likedBy&&currentUser&&p.likedBy.includes(currentUser.id);
+    return '<div class="forum-post-card"><div class="forum-post-title" onclick="openForumPost('+p.id+')">'+p.title+'</div><div class="forum-post-excerpt" onclick="openForumPost('+p.id+')">'+p.excerpt+'</div><div class="forum-post-footer"><span>👤 '+p.author+'</span><span>📅 '+p.date+'</span><span>💬 '+replyCount+' replies</span><span>👁️ '+(p.views||0)+' views</span><span class="like-btn '+(liked?'liked':'')+'" onclick="event.stopPropagation();togglePostLike('+p.id+')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>'+(p.likes||0)+'</span>'+(lastComment?'<span style="margin-left:auto;color:var(--text-muted)">Last: '+lastComment.username+' · '+lastComment.date+'</span>':'')+'</div></div>';
   }).join('');
 }
 function openForumPost(id){
   const p=FORUM_POSTS.find(x=>x.id===id);
   if(!p)return;
   p.views=(p.views||0)+1;
+  if(!p.likedBy)p.likedBy=[];
   Store.set('forum',FORUM_POSTS);
   const comments=p.comments||[];
   let commentsHtml='';
   if(comments.length>0){
-    commentsHtml=comments.map(c=>'<div class="comment"><div class="comment-avatar">'+(c.username||'U').charAt(0).toUpperCase()+'</div><div class="comment-body"><div class="comment-user">'+(c.username||'Anonymous')+' <span class="comment-time">'+c.date+'</span></div><div class="comment-text">'+c.content.replace(/\n/g,'<br>')+'</div></div></div>').join('');
+    commentsHtml=comments.map(cm=>{
+      const cLiked=cm.likedBy&&currentUser&&cm.likedBy.includes(currentUser.id);
+      const imgs=(cm.images&&cm.images.length>0)?'<div class="comment-images">'+cm.images.map(img=>'<img src="'+img+'" onclick="previewReviewImage(\''+img+'\')">').join('')+'</div>':'';
+      return '<div class="comment"><div class="comment-avatar">'+(cm.username||'U').charAt(0).toUpperCase()+'</div><div class="comment-body"><div class="comment-user">'+(cm.username||'Anonymous')+' <span class="comment-time">'+cm.date+'</span></div><div class="comment-text">'+cm.content.replace(/\n/g,'<br>')+'</div>'+imgs+'<div style="margin-top:6px"><span class="like-btn '+(cLiked?'liked':'')+'" onclick="toggleCommentLike('+p.id+',\''+cm.id+'\')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>'+(cm.likes||0)+'</span></div></div></div>';
+    }).join('');
   }else{
     commentsHtml='<div style="text-align:center;color:var(--text-muted);padding:20px;">No comments yet. Be the first to comment!</div>';
   }
-  const commentForm=currentUser?'<div class="comment-form"><textarea id="commentInput" class="comment-textarea" placeholder="Write your comment..."></textarea><button class="comment-submit-btn" onclick="submitComment('+p.id+')">Post Comment</button></div>':'<div style="text-align:center;padding:16px;background:var(--bg);border-radius:8px;color:var(--text-muted)">Please <a onclick="showAuthModal()" style="color:var(--primary);cursor:pointer;text-decoration:underline">login</a> to comment</div>';
+  const postLiked=p.likedBy&&currentUser&&p.likedBy.includes(currentUser.id);
+  const commentForm=currentUser?'<div class="comment-form"><div class="comment-toolbar"><label class="comment-upload-btn" for="commentImgInput">📷 Image</label><input type="file" id="commentImgInput" accept="image/*" multiple style="display:none" onchange="handleCommentImageUpload(event)"><div class="comment-emoji-wrap"><span class="comment-upload-btn" onclick="toggleCommentEmoji(event)">😀 Emoji</span><div class="comment-emoji-picker" id="commentEmojiPicker"><div class="comment-emoji-grid">'+getCommentEmojiList()+'</div></div></div></div><div class="comment-img-preview" id="commentImgPreview"></div><textarea id="commentInput" class="comment-textarea" placeholder="Write your comment..."></textarea><button class="comment-submit-btn" onclick="submitComment('+p.id+')">Post Comment</button></div>':'<div style="text-align:center;padding:16px;background:var(--bg);border-radius:8px;color:var(--text-muted)">Please <a onclick="showAuthModal()" style="color:var(--primary);cursor:pointer;text-decoration:underline">login</a> to comment</div>';
   document.getElementById('forumList-view').style.display='none';
   document.getElementById('forumDetail-view').style.display='block';
-  document.getElementById('postDetailContent').innerHTML='<h2>'+p.title+'</h2><div class="post-meta"><span>👤 '+p.author+'</span><span>📅 '+p.date+'</span><span>👁️ '+(p.views||0)+' views</span><span>💬 '+comments.length+' comments</span></div><div class="post-content">'+p.content.replace(/\n/g,'<br>')+'</div><div class="comments-section"><h4>Comments ('+comments.length+')</h4>'+commentsHtml+commentForm+'</div>';
+  document.getElementById('postDetailContent').innerHTML='<h2>'+p.title+'</h2><div class="post-meta"><span>👤 '+p.author+'</span><span>📅 '+p.date+'</span><span>👁️ '+(p.views||0)+' views</span><span>💬 '+comments.length+' comments</span><span class="like-btn '+(postLiked?'liked':'')+'" onclick="togglePostLike('+p.id+')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>'+(p.likes||0)+' Likes</span></div><div class="post-content">'+p.content.replace(/\n/g,'<br>')+'</div><div class="comments-section"><h4>Comments ('+comments.length+')</h4>'+commentsHtml+commentForm+'</div>';
   navigate('forum');
   window.scrollTo({top:0});
+  window._commentImages=[];
 }
 function showForumList(){document.getElementById('forumList-view').style.display='block';document.getElementById('forumDetail-view').style.display='none'}
 function showNewPostForm(){
@@ -917,6 +945,40 @@ function submitNewPost(){
   renderForumList();
   renderForumPreview();
 }
+let _commentImages=[];
+function getCommentEmojiList(){return EMOJI_LIST.slice(0,80).map(e=>'<span class="comment-emoji-item" onclick="insertCommentEmoji(\''+e.replace(/'/g,"\\'")+'\')">'+e+'</span>').join('');}
+function toggleCommentEmoji(e){e.stopPropagation();const picker=document.getElementById('commentEmojiPicker');if(picker)picker.classList.toggle('show');}
+function insertCommentEmoji(emoji){const textarea=document.getElementById('commentInput');if(textarea){const start=textarea.selectionStart;const end=textarea.selectionEnd;textarea.value=textarea.value.substring(0,start)+emoji+textarea.value.substring(end);textarea.focus();textarea.selectionStart=textarea.selectionEnd=start+emoji.length;}const picker=document.getElementById('commentEmojiPicker');if(picker)picker.classList.remove('show');}
+function handleCommentImageUpload(e){const files=e.target.files;for(const file of files){const reader=new FileReader();reader.onload=ev=>{_commentImages.push(ev.target.result);updateCommentImgPreview();};reader.readAsDataURL(file);}}
+function updateCommentImgPreview(){const preview=document.getElementById('commentImgPreview');if(preview){preview.innerHTML=_commentImages.map((img,i)=>'<span><img src="'+img+'"><span class="remove-img" onclick="removeCommentImg('+i+')">×</span></span>').join('');}}
+function removeCommentImg(i){_commentImages.splice(i,1);updateCommentImgPreview();}
+function togglePostLike(postId){
+  if(!currentUser){showToast('Please login to like');showAuthModal();return;}
+  const post=FORUM_POSTS.find(p=>p.id===postId);
+  if(!post)return;
+  if(!post.likedBy)post.likedBy=[];
+  const idx=post.likedBy.indexOf(currentUser.id);
+  if(idx>=0){post.likedBy.splice(idx,1);post.likes=Math.max(0,(post.likes||1)-1);}
+  else{post.likedBy.push(currentUser.id);post.likes=(post.likes||0)+1;}
+  Store.set('forum',FORUM_POSTS);
+  if(document.getElementById('forumList-view').style.display!=='none'){renderForumList();}
+  else{openForumPost(postId);}
+}
+function toggleCommentLike(postId,commentId){
+  if(!currentUser){showToast('Please login to like');showAuthModal();return;}
+  const post=FORUM_POSTS.find(p=>p.id===postId);
+  if(!post||!post.comments)return;
+  const cm=post.comments.find(c=>c.id===commentId);
+  if(!cm)return;
+  if(!cm.likedBy)cm.likedBy=[];
+  const idx=cm.likedBy.indexOf(currentUser.id);
+  if(idx>=0){cm.likedBy.splice(idx,1);cm.likes=Math.max(0,(cm.likes||1)-1);}
+  else{cm.likedBy.push(currentUser.id);cm.likes=(cm.likes||0)+1;}
+  Store.set('forum',FORUM_POSTS);
+  openForumPost(postId);
+}
+function previewReviewImage(src){const overlay=document.createElement('div');overlay.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);display:flex;align-items:center;justify-content:center;z-index:9999;cursor:pointer';overlay.innerHTML='<img src="'+src+'" style="max-width:90%;max-height:90%;object-fit:contain">';overlay.onclick=()=>overlay.remove();document.body.appendChild(overlay);}
+document.addEventListener('click',function(e){const picker=document.getElementById('commentEmojiPicker');const btn=e.target.closest('.comment-emoji-wrap');if(picker&&!btn){picker.classList.remove('show');}});
 function submitComment(postId){
   if(!currentUser){showToast('Please login to comment');return;}
   const input=document.getElementById('commentInput');
@@ -925,7 +987,7 @@ function submitComment(postId){
   const post=FORUM_POSTS.find(p=>p.id===postId);
   if(!post)return;
   if(!post.comments)post.comments=[];
-  post.comments.push({id:'c_'+Date.now(),userId:currentUser.id,username:currentUser.username,content:content,date:new Date().toISOString().split('T')[0]});
+  post.comments.push({id:'c_'+Date.now(),userId:currentUser.id,username:currentUser.username,content:content,date:new Date().toISOString().split('T')[0],likes:0,likedBy:[],images:_commentImages.slice()});
   post.replies=post.comments.length;
   Store.set('forum',FORUM_POSTS);
   showToast('Comment posted!');
