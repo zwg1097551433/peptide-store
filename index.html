@@ -375,6 +375,19 @@ body{padding-bottom:64px}
 .cart-fab svg{width:20px;height:20px}
 .chat-fab{width:52px;height:52px;right:12px;bottom:calc(64px + 76px)}
 .chat-fab svg{width:22px;height:22px}
+/* Mobile Forum Optimization */
+.forum-header{flex-direction:column;align-items:flex-start;gap:12px}
+.forum-header h2{font-size:20px;margin:0}
+.forum-sort-tabs{margin-left:0!important;margin-right:0!important;flex-wrap:wrap;gap:6px;width:100%}
+.forum-sort-btn{padding:5px 10px;font-size:12px}
+.forum-new-btn{padding:8px 14px;font-size:13px;align-self:flex-end}
+.forum-post-card{padding:14px}
+.forum-post-title{font-size:14px}
+.forum-post-excerpt{font-size:12px;margin-bottom:8px}
+.forum-post-footer{flex-wrap:wrap;gap:8px 12px;font-size:11px}
+.forum-post-footer span{gap:3px}
+.forum-post-footer .like-btn{margin-left:auto}
+
 .checkout-grid{grid-template-columns:1fr}
 .order-summary{position:static}
 .form-row{grid-template-columns:1fr}
@@ -382,6 +395,10 @@ body{padding-bottom:64px}
 .lang-select{font-size:12px;padding:4px 8px}
 }
 @media(max-width:480px){
+.forum-sort-btn{padding:4px 8px;font-size:11px}
+.forum-post-footer{gap:6px 8px;font-size:10px}
+.forum-post-card{padding:12px}
+
 .product-grid{grid-template-columns:repeat(2,1fr)}
 .cat-grid{grid-template-columns:repeat(2,1fr)}
 .hero h1{font-size:19px}
