@@ -162,6 +162,41 @@ ul{list-style:none}
 .review-meta{font-size:11px;color:var(--text-light)}
 .review-stars{color:var(--accent);font-size:13px;margin-bottom:6px}
 .review-text{font-size:13px;color:var(--text-muted);line-height:1.5}
+.review-product-link{font-size:12px;color:var(--primary);cursor:pointer;text-decoration:underline;margin-top:6px}
+.product-reviews-section{margin-top:40px;padding-top:30px;border-top:1px solid var(--border)}
+.product-reviews-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.product-reviews-header h3{font-size:20px;margin:0}
+.review-summary{display:flex;align-items:center;gap:16px;margin-bottom:20px;padding:16px;background:var(--surface);border-radius:8px;border:1px solid var(--border-light)}
+.review-avg-score{font-size:36px;font-weight:700;color:var(--primary)}
+.review-avg-stars{font-size:20px;color:#ffc107}
+.review-count{color:var(--text-muted);font-size:14px}
+.review-form{background:var(--surface);padding:20px;border-radius:8px;margin-bottom:24px;border:1px solid var(--border-light)}
+.review-form h4{margin:0 0 12px;font-size:16px}
+.star-rating{display:flex;gap:4px;margin-bottom:12px}
+.star-rating .star{font-size:28px;cursor:pointer;color:#ddd;transition:color .2s;user-select:none}
+.star-rating .star.active{color:#ffc107}
+.star-rating .star:hover{color:#ffc107;transform:scale(1.1)}
+.review-textarea{width:100%;min-height:80px;padding:12px;border:1px solid var(--border);border-radius:6px;font-size:14px;resize:vertical;font-family:inherit;margin-bottom:12px;box-sizing:border-box}
+.review-image-upload{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.review-image-upload label{cursor:pointer;color:var(--primary);font-size:14px;text-decoration:underline}
+.review-image-preview{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.review-image-preview img{width:60px;height:60px;object-fit:cover;border-radius:4px;border:1px solid var(--border)}
+.review-submit-btn{background:var(--primary);color:#fff;border:none;padding:10px 24px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:600}
+.review-submit-btn:disabled{background:#ccc;cursor:not-allowed}
+.review-list{display:flex;flex-direction:column;gap:16px}
+.review-item{padding:16px;background:var(--surface);border-radius:8px;border:1px solid var(--border-light)}
+.review-item-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.review-item-user{display:flex;align-items:center;gap:10px}
+.review-item-avatar{width:36px;height:36px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px}
+.review-item-info{display:flex;flex-direction:column}
+.review-item-name{font-weight:600;font-size:14px}
+.review-item-date{font-size:12px;color:var(--text-muted)}
+.review-item-stars{color:#ffc107;font-size:14px}
+.review-item-content{font-size:14px;line-height:1.6;color:var(--text);margin:8px 0}
+.review-item-images{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.review-item-images img{width:80px;height:80px;object-fit:cover;border-radius:4px;cursor:pointer;border:1px solid var(--border)}
+.review-login-prompt{text-align:center;padding:30px;background:var(--surface);border-radius:8px;color:var(--text-muted);border:1px solid var(--border-light)}
+.review-login-prompt a{color:var(--primary);cursor:pointer;text-decoration:underline}
 .forum-preview{display:flex;flex-direction:column;gap:10px}
 .forum-item{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border-light);border-radius:var(--radius-sm);padding:14px 16px;cursor:pointer;transition:all .2s}
 .forum-item:hover{border-color:var(--primary-light);background:var(--primary-bg)}
@@ -585,10 +620,19 @@ body{padding-bottom:64px}
         Add to Cart
       </button>
     </div>
+    <!-- Product Reviews Section -->
+    <div class="product-reviews-section" id="productReviewsSection">
+      <div class="product-reviews-header">
+        <h3>Customer Reviews</h3>
+      </div>
+      <div id="productReviewSummary"></div>
+      <div id="productReviewForm"></div>
+      <div class="review-list" id="productReviewList"></div>
+    </div>
   </div>
 </div>
 
-<div id="view-logistics" class="view">
+<div id="view-logistics"  class="view">
   <div style="max-width:900px;margin:0 auto;padding:40px 20px;">
     <button class="back-btn" onclick="goBack()" style="margin-bottom:20px;background:var(--primary);color:#fff;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:600;">&larr; Back</button>
     <h2 style="text-align:center;margin-bottom:8px;font-size:28px;">Track Your Order</h2>
@@ -653,13 +697,11 @@ const DEFAULT_FORUM = [
   {id:5,title:'Shipping to Australia — customs experience',author:'OzUser',date:'2026-08-25',replies:15,views:620,excerpt:'Third order delivered successfully to Sydney...',content:'Shipping to Australia takes 7-10 business days. Packaging is discreet. No problems so far.'}
 ];
 const DEFAULT_REVIEWS = [
-  {id:1,user:'James K.',country:'USA',rating:5,text:'Excellent quality Tirzepatide. Fast shipping to Texas. Will order again.'},
-  {id:2,user:'Maria G.',country:'Mexico',rating:5,text:'BPC-157 helped my knee recovery. Customer service very responsive.'},
-  {id:3,user:'Thomas L.',country:'Germany',rating:4,text:'Good HGH quality, delivery to Berlin took 8 days.'},
-  {id:4,user:'Sophie M.',country:'France',rating:5,text:'Retatrutide results exceeded expectations. Lost 8kg in 6 weeks.'},
-  {id:5,user:'David W.',country:'UK',rating:5,text:'Reliable supplier, third order. COA verification gives confidence.'},
-  {id:6,user:'Carlos R.',country:'Spain',rating:4,text:'Semaglutide works well. Overall satisfied.'},
-  {id:7,user:'Anna P.',country:'Canada',rating:5,text:'Glutathione quality is top notch.'}
+  {id:'rev_1',productId:'',productName:'Tirzepatide',userId:'demo1',username:'John D.',rating:5,content:'Excellent quality! Fast shipping to USA. Will order again. 👍',images:[],date:'2026-08-15'},
+  {id:'rev_2',productId:'',productName:'Semaglutide',userId:'demo2',username:'Maria G.',rating:5,content:'Great product, arrived in perfect condition. Highly recommended! ⭐⭐⭐⭐⭐',images:[],date:'2026-08-20'},
+  {id:'rev_3',productId:'',productName:'Retatrutide',userId:'demo3',username:'Mike R.',rating:4,content:'Good value for money. Packaging was discreet and professional.',images:[],date:'2026-09-01'},
+  {id:'rev_4',productId:'',productName:'BPC-157',userId:'demo4',username:'Sarah K.',rating:5,content:'Amazing recovery benefits. Customer service was very helpful. 💪',images:[],date:'2026-09-05'},
+  {id:'rev_5',productId:'',productName:'HGH',userId:'demo5',username:'Alex M.',rating:5,content:'Top quality peptides. COA verification gave me confidence. ✨',images:[],date:'2026-09-08'}
 ];
 const DEFAULT_COA = [{id:1,batch:'PL-2026-0901',product:'Tirzepatide 10mg',date:'2026-09-01',purity:'99.2%',note:'HPLC tested, meets USP standards'}];
 const DEFAULT_FACTORY = [{id:1,title:'GMP Certified Production Line',desc:'Automated vial filling in clean room environment',image:'https://aka.doubaocdn.com/s/crEdhuTAQ3'}];
@@ -793,7 +835,22 @@ function cartCount(){return cart.reduce((s,c)=>s+c.qty,0)}
 function renderCart(){const badge=document.getElementById('cartFabBadge');const cnt=cartCount();badge.style.display=cnt>0?'flex':'none';badge.textContent=cnt;document.getElementById('cartTotal').textContent='$'+cartTotal().toFixed(2);document.getElementById('cartCheckoutBtn').disabled=cart.length===0;const body=document.getElementById('cartBody');if(cart.length===0){body.innerHTML='<div class="cart-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg><p>'+t('cart.empty')+'</p></div>';return}body.innerHTML=cart.map(c=>'<div class="cart-item"><div class="cart-item-img"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 3v6l-5 9a2 2 0 001.8 3h12.4a2 2 0 001.8-3l-5-9V3"/></svg></div><div class="cart-item-info"><div class="cart-item-name">'+c.name+'</div><div class="cart-item-spec">'+c.spec+'</div><div class="cart-item-bottom"><div class="qty-control"><button class="qty-btn" onclick="changeQty(\''+c.key+'\',-1)">-</button><span class="qty-val">'+c.qty+'</span><button class="qty-btn" onclick="changeQty(\''+c.key+'\',1)">+</button></div><span class="cart-item-price">$'+(c.price*c.qty).toFixed(2)+'</span></div><span class="cart-remove" onclick="removeFromCart(\''+c.key+'\')">Remove</span></div></div>').join('')}
 function toggleCart(){document.getElementById('cartDrawer').classList.toggle('open');document.getElementById('cartOverlay').classList.toggle('open')}
 function goCheckout(){toggleCart();navigate('checkout')}
-function renderReviews(){document.getElementById('reviewsList').innerHTML=REVIEWS.map(r=>'<div class="review-card"><div class="review-header"><div class="review-avatar">'+r.user.charAt(0)+'</div><div><div class="review-user">'+r.user+'</div><div class="review-meta">'+r.country+'</div></div></div><div class="review-stars">'+'★'.repeat(r.rating)+'☆'.repeat(5-r.rating)+'</div><div class="review-text">'+r.text+'</div></div>').join('')}
+function renderReviews(){
+  const list=document.getElementById('reviewsList');
+  if(!list)return;
+  list.innerHTML=REVIEWS.map(r=>{
+    const username=r.username||r.user||'Anonymous';
+    const productName=r.productName||'General';
+    const content=r.content||r.text||'';
+    const date=r.date||'';
+    return '<div class="review-card"><div class="review-header"><div class="review-avatar">'+username.charAt(0).toUpperCase()+'</div><div><div class="review-user">'+username+'</div><div class="review-meta">'+date+'</div></div></div><div class="review-stars">'+'★'.repeat(r.rating)+'☆'.repeat(5-r.rating)+'</div><div class="review-text">'+content+'</div><div class="review-product-link" onclick="navigateToProductByName(\''+productName.replace(/'/g,"\\'")+'\')">📦 '+productName+'</div></div>';
+  }).join('');
+}
+function navigateToProductByName(name){
+  const product=PRODUCTS.find(p=>p.name.toLowerCase().includes(name.toLowerCase())||name.toLowerCase().includes(p.name.toLowerCase()));
+  if(product){currentProduct=product;navigate('product');renderProductDetail();}
+  else{showToast('Product not found');}
+}
 function renderForumPreview(){document.getElementById('forumPreview').innerHTML=FORUM_POSTS.slice(0,5).map((p,i)=>'<div class="forum-item" onclick="openForumPost('+p.id+')"><div class="forum-num">'+String(i+1).padStart(2,'0')+'</div><div class="forum-info"><div class="forum-title">'+p.title+'</div><div class="forum-meta">'+p.author+' · '+p.date+' · '+p.replies+' replies</div></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;color:var(--text-light);"><polyline points="9 18 15 12 9 6"/></svg></div>').join('')}
 function renderForumList(){document.getElementById('forumFullList').innerHTML=FORUM_POSTS.map(p=>'<div class="forum-post-card" onclick="openForumPost('+p.id+')"><div class="forum-post-title">'+p.title+'</div><div class="forum-post-excerpt">'+p.excerpt+'</div><div class="forum-post-footer"><span>'+p.author+'</span><span>'+p.date+'</span><span>'+p.replies+' replies</span><span>'+p.views+' views</span></div></div>').join('')}
 function openForumPost(id){const p=FORUM_POSTS.find(x=>x.id===id);if(!p)return;document.getElementById('forumList-view').style.display='none';document.getElementById('forumDetail-view').style.display='block';document.getElementById('postDetailContent').innerHTML='<h2>'+p.title+'</h2><div class="post-meta"><span>'+p.author+'</span><span>'+p.date+'</span><span>'+p.views+' views</span><span>'+p.replies+' replies</span></div><div class="post-content">'+p.content.replace(/\n/g,'<br>')+'</div><div class="comments-section"><h4>Comments ('+p.replies+')</h4><div class="comment"><div class="comment-avatar">R</div><div class="comment-body"><div class="comment-user">Researcher101 <span class="comment-time">2 days ago</span></div><div class="comment-text">Great insights, thanks for sharing!</div></div></div></div>';navigate('forum');window.scrollTo({top:0})}
@@ -953,6 +1010,7 @@ function openProductDetail(pid){
   renderProductSpecList();
   updateProductSummary();
   navigate('product');
+  renderProductReviews();
 }
 
 function renderProductSpecList(){
@@ -1006,6 +1064,59 @@ function confirmAddToCart(){
     renderProductSpecList();
     updateProductSummary();
   }
+}
+
+// ===== Product Reviews =====
+let reviewRating=0;
+let reviewImages=[];
+
+function renderProductReviews(){
+  if(!currentProduct)return;
+  const productReviews=REVIEWS.filter(r=>r.productId===currentProduct.id||(r.productName&&currentProduct.name&&currentProduct.name.toLowerCase().includes(r.productName.toLowerCase())));
+  const summaryEl=document.getElementById('productReviewSummary');
+  if(summaryEl){
+    if(productReviews.length>0){
+      const avg=productReviews.reduce((s,r)=>s+r.rating,0)/productReviews.length;
+      summaryEl.innerHTML='<div class="review-summary"><div class="review-avg-score">'+avg.toFixed(1)+'</div><div class="review-avg-stars">'+'★'.repeat(Math.round(avg))+'☆'.repeat(5-Math.round(avg))+'</div><div class="review-count">'+productReviews.length+' review(s)</div></div>';
+    }else{
+      summaryEl.innerHTML='<div class="review-summary"><div class="review-count">No reviews yet. Be the first to review!</div></div>';
+    }
+  }
+  const formEl=document.getElementById('productReviewForm');
+  if(formEl){
+    if(currentUser){
+      formEl.innerHTML='<div class="review-form"><h4>Write a Review</h4><div class="star-rating" id="reviewStars"><span class="star" onclick="setReviewRating(1)">★</span><span class="star" onclick="setReviewRating(2)">★</span><span class="star" onclick="setReviewRating(3)">★</span><span class="star" onclick="setReviewRating(4)">★</span><span class="star" onclick="setReviewRating(5)">★</span></div><textarea class="review-textarea" id="reviewContent" placeholder="Share your experience... (emoji supported 😊)"></textarea><div class="review-image-upload"><label for="reviewImageInput">📷 Add Photos</label><input type="file" id="reviewImageInput" accept="image/*" multiple style="display:none" onchange="handleReviewImageUpload(event)"></div><div class="review-image-preview" id="reviewImagePreview"></div><button class="review-submit-btn" onclick="submitProductReview()">Submit Review</button></div>';
+      reviewRating=0;reviewImages=[];
+    }else{
+      formEl.innerHTML='<div class="review-login-prompt">Please <a onclick="showAuthModal()">login</a> to write a review</div>';
+    }
+  }
+  const listEl=document.getElementById('productReviewList');
+  if(listEl){
+    if(productReviews.length>0){
+      listEl.innerHTML=productReviews.sort((a,b)=>new Date(b.date)-new Date(a.date)).map(r=>{
+        const imgs=(r.images&&r.images.length>0)?'<div class="review-item-images">'+r.images.map(img=>'<img src="'+img+'" onclick="previewReviewImage(\''+img+'\')">').join('')+'</div>':'';
+        return '<div class="review-item"><div class="review-item-header"><div class="review-item-user"><div class="review-item-avatar">'+(r.username||'U').charAt(0).toUpperCase()+'</div><div class="review-item-info"><div class="review-item-name">'+(r.username||'Anonymous')+'</div><div class="review-item-date">'+r.date+'</div></div></div><div class="review-item-stars">'+'★'.repeat(r.rating)+'☆'.repeat(5-r.rating)+'</div></div><div class="review-item-content">'+r.content+'</div>'+imgs+'</div>';
+      }).join('');
+    }else{listEl.innerHTML='';}
+  }
+}
+function setReviewRating(n){reviewRating=n;const stars=document.querySelectorAll('#reviewStars .star');stars.forEach((s,i)=>{if(i<n)s.classList.add('active');else s.classList.remove('active');});}
+function handleReviewImageUpload(e){const files=e.target.files;for(const file of files){const reader=new FileReader();reader.onload=ev=>{reviewImages.push(ev.target.result);updateReviewImagePreview();};reader.readAsDataURL(file);}}
+function updateReviewImagePreview(){const preview=document.getElementById('reviewImagePreview');if(preview){preview.innerHTML=reviewImages.map((img,i)=>'<div style="position:relative"><img src="'+img+'"><span style="position:absolute;top:-5px;right:-5px;background:#dc3545;color:#fff;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer" onclick="removeReviewImage('+i+')">×</span></div>').join('');}}
+function removeReviewImage(i){reviewImages.splice(i,1);updateReviewImagePreview();}
+function previewReviewImage(src){const overlay=document.createElement('div');overlay.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);display:flex;align-items:center;justify-content:center;z-index:9999;cursor:pointer';overlay.innerHTML='<img src="'+src+'" style="max-width:90%;max-height:90%;object-fit:contain">';overlay.onclick=()=>overlay.remove();document.body.appendChild(overlay);}
+function submitProductReview(){
+  if(!currentUser){showToast('Please login first');return;}
+  if(reviewRating===0){showToast('Please select a rating (1-5 stars)');return;}
+  const content=document.getElementById('reviewContent').value.trim();
+  if(!content){showToast('Please write your review');return;}
+  const newReview={id:'rev_'+Date.now(),productId:currentProduct.id,productName:currentProduct.name,userId:currentUser.id,username:currentUser.username,rating:reviewRating,content:content,images:reviewImages.slice(),date:new Date().toISOString().split('T')[0]};
+  REVIEWS.unshift(newReview);
+  saveData('reviews');
+  showToast('Review submitted successfully!');
+  renderProductReviews();
+  renderReviews();
 }
 
 // Override openProductSpecs to use new detail page
