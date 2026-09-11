@@ -125,6 +125,8 @@ input,select,textarea{font-family:inherit;font-size:14px}
 }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/pptxjs@1.2.0/dist/pptxjs.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
 </head>
 <body>
 
@@ -328,7 +330,8 @@ function openCOABatchForm(batchId){
   html+='<div style="grid-column:1/-1;"><label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">水印文字（上传图片时自动添加）</label><input type="text" id="coaWatermark" value="'+(b.watermark||'PeptideLab COA')+'" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;" placeholder="如 PeptideLab COA Verified"></div>';
   html+='</div>';
   if(isEdit){
-    html+='<div style="margin-bottom:16px;"><label style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;">上传COA报告图片（可多选）</label><input type="file" id="coaImageUpload" accept="image/*,.pptx,.ppt" multiple style="margin-bottom:12px;"><p style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">支持图片(JPG/PNG/GIF)和PPT/PPTX格式，上传后自动添加水印</p><button class="btn btn-primary btn-sm" onclick="uploadCOAImages()">上传图片</button></div>';
+    html+='<div style="margin-bottom:16px;"><label style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;">上传COA报告图片（可多选）</label><input type="file" id="coaImageUpload" accept="image/*,.pptx,.ppt,.pdf" multiple style="margin-bottom:12px;"><p style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">支持图片(JPG/PNG/GIF)、PPT/PPTX、PDF格式，上传后自动添加水印</p><button class="btn btn-primary btn-sm" onclick="uploadCOAImages()">上传文件</button></div>';
+    html+='<div style="margin-bottom:16px;padding:12px;background:var(--bg);border-radius:6px;"> <div style="display:flex;gap:8px;align-items:center;"> <input type="text" id="coaWatermarkQuick" value="'+(b.watermark||'PeptideLab COA')+'" style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:6px;" placeholder="输入水印文字"> <button class="btn btn-primary btn-sm" onclick="quickSaveWatermark()">一键保存</button> <button class="btn btn-secondary btn-sm" onclick="quickReplaceWatermark()" style="background:#ff9800;color:#fff;border-color:#ff9800;">一键替换</button> </div> <p style="font-size:11px;color:var(--text-muted);margin-top:6px;">一键保存：后续上传图片使用此水印 | 一键替换：替换所有已上传图片的水印</p> </div>';
     const imgs=b.images||[];
     if(imgs.length>0){
       html+='<h4 style="margin-bottom:12px;font-size:14px;">已上传图片 ('+imgs.length+')</h4><div class="coa-image-list">';
@@ -369,32 +372,105 @@ function uploadCOAImages(){
   if(!input.files||input.files.length===0){showToast('请选择文件');return}
   const files=Array.from(input.files);
   let processed=0;
+  const total=files.length;
   files.forEach(file=>{
     const ext=file.name.split('.').pop().toLowerCase();
     if(ext==='pptx'||ext==='ppt'){
       convertPPTToImages(file).then(images=>{
         images.forEach((imgData,i)=>{
-          addCOAImageWithWatermark(file.name.replace(/\.(pptx?)$/i,'')+'_页'+(i+1)+'.png',imgData);
+          addCOAImageWithOriginal(file.name.replace(/\.(pptx?)$/i,'')+'_页'+(i+1)+'.png',imgData);
         });
         processed++;
-        if(processed===files.length){saveData('coa');showToast('上传完成');openCOABatchForm(currentEditingCOABatch.id)}
-      }).catch(err=>{showToast('PPT转换失败: '+file.name);processed++;if(processed===files.length){openCOABatchForm(currentEditingCOABatch.id)}});
+        checkUploadComplete(processed,total);
+      }).catch(err=>{showToast('PPT转换失败: '+file.name);processed++;checkUploadComplete(processed,total)});
+    }else if(ext==='pdf'){
+      convertPDFToImages(file).then(images=>{
+        images.forEach((imgData,i)=>{
+          addCOAImageWithOriginal(file.name.replace(/\.pdf$/i,'')+'_页'+(i+1)+'.png',imgData);
+        });
+        processed++;
+        checkUploadComplete(processed,total);
+      }).catch(err=>{showToast('PDF转换失败: '+file.name);processed++;checkUploadComplete(processed,total)});
     }else{
       const reader=new FileReader();
       reader.onload=e=>{
-        addWatermarkToImage(e.target.result,file.name,currentEditingCOABatch.watermark).then(watermarked=>{
-          addCOAImageWithWatermark(file.name,watermarked);
-          processed++;
-          if(processed===files.length){saveData('coa');showToast('上传完成，已添加水印');openCOABatchForm(currentEditingCOABatch.id)}
-        });
+        addCOAImageWithOriginal(file.name,e.target.result);
+        processed++;
+        checkUploadComplete(processed,total);
       };
       reader.readAsDataURL(file);
     }
   });
 }
-function addCOAImageWithWatermark(name,data){
+function checkUploadComplete(processed,total){
+  if(processed===total){
+    // Apply watermark to all newly added images
+    applyWatermarkToAllImages().then(()=>{
+      saveData('coa');
+      showToast('上传完成，已添加水印');
+      openCOABatchForm(currentEditingCOABatch.id);
+    });
+  }
+}
+function addCOAImageWithOriginal(name,originalData){
   if(!currentEditingCOABatch.images)currentEditingCOABatch.images=[];
-  currentEditingCOABatch.images.push({id:'img_'+Date.now()+'_'+Math.random().toString(36).substr(2,5),name:name,data:data});
+  currentEditingCOABatch.images.push({
+    id:'img_'+Date.now()+'_'+Math.random().toString(36).substr(2,5),
+    name:name,
+    originalData:originalData,
+    data:originalData
+  });
+}
+function applyWatermarkToAllImages(){
+  return new Promise((resolve)=>{
+    const watermarkText=currentEditingCOABatch.watermark||'PeptideLab COA';
+    const images=currentEditingCOABatch.images||[];
+    if(images.length===0){resolve();return}
+    let processed=0;
+    images.forEach((img,idx)=>{
+      if(img.originalData){
+        addWatermarkToImage(img.originalData,img.name,watermarkText).then(watermarked=>{
+          images[idx].data=watermarked;
+          processed++;
+          if(processed===images.length)resolve();
+        }).catch(()=>{processed++;if(processed===images.length)resolve()});
+      }else{
+        processed++;
+        if(processed===images.length)resolve();
+      }
+    });
+  });
+}
+function quickSaveWatermark(){
+  const wm=document.getElementById('coaWatermarkQuick').value.trim();
+  document.getElementById('coaWatermark').value=wm;
+  currentEditingCOABatch.watermark=wm;
+  saveData('coa');
+  showToast('水印已保存: '+wm);
+}
+function quickReplaceWatermark(){
+  const wm=document.getElementById('coaWatermarkQuick').value.trim();
+  if(!wm){showToast('请输入水印文字');return}
+  document.getElementById('coaWatermark').value=wm;
+  replaceAllWatermarks();
+}
+function saveWatermark(){
+  const watermark=document.getElementById('coaWatermark').value.trim();
+  currentEditingCOABatch.watermark=watermark;
+  saveData('coa');
+  showToast('水印已保存，后续上传将使用此水印');
+}
+function replaceAllWatermarks(){
+  const watermark=document.getElementById('coaWatermark').value.trim();
+  if(!watermark){showToast('请输入水印文字');return}
+  if(!confirm('确定要将所有已上传图片的水印替换为"'+watermark+'"吗？'))return;
+  currentEditingCOABatch.watermark=watermark;
+  showToast('正在重新生成水印，请稍候...');
+  applyWatermarkToAllImages().then(()=>{
+    saveData('coa');
+    showToast('所有图片水印已替换为: '+watermark);
+    openCOABatchForm(currentEditingCOABatch.id);
+  });
 }
 function addWatermarkToImage(imageData,fileName,watermarkText){
   return new Promise((resolve,reject)=>{
@@ -405,7 +481,6 @@ function addWatermarkToImage(imageData,fileName,watermarkText){
       canvas.height=img.height;
       const ctx=canvas.getContext('2d');
       ctx.drawImage(img,0,0);
-      // Watermark settings
       ctx.save();
       ctx.globalAlpha=0.12;
       ctx.fillStyle='#000000';
@@ -413,14 +488,11 @@ function addWatermarkToImage(imageData,fileName,watermarkText){
       ctx.font='bold '+fontSize+'px Arial';
       ctx.textAlign='center';
       ctx.textBaseline='middle';
-      // Rotate -30 degrees
       const angle=-Math.PI/6;
-      // Calculate spacing
-      const text=watermarkText||'PeptideLab COA Verified';
+      const text=watermarkText||'PeptideLab COA';
       const textWidth=ctx.measureText(text).width;
       const spacingX=textWidth*1.5;
       const spacingY=fontSize*3;
-      // Draw watermark from top-left to bottom-right, covering entire image
       const diagonal=Math.sqrt(img.width*img.width+img.height*img.height);
       const rows=Math.ceil(diagonal/spacingY)+2;
       const cols=Math.ceil(diagonal/spacingX)+2;
@@ -436,6 +508,36 @@ function addWatermarkToImage(imageData,fileName,watermarkText){
     };
     img.onerror=reject;
     img.src=imageData;
+  });
+}
+function convertPDFToImages(file){
+  return new Promise((resolve,reject)=>{
+    if(typeof pdfjsLib==='undefined'){reject(new Error('PDF转换库未加载'));return}
+    const reader=new FileReader();
+    reader.onload=function(e){
+      pdfjsLib.getDocument({data:e.target.result}).promise.then(pdf=>{
+        const images=[];
+        let pageNum=1;
+        function renderNextPage(){
+          if(pageNum>pdf.numPages){resolve(images);return}
+          pdf.getPage(pageNum).then(page=>{
+            const viewport=page.getViewport({scale:1.5});
+            const canvas=document.createElement('canvas');
+            canvas.width=viewport.width;
+            canvas.height=viewport.height;
+            const ctx=canvas.getContext('2d');
+            page.render({canvasContext:ctx,viewport:viewport}).promise.then(()=>{
+              images.push(canvas.toDataURL('image/png'));
+              pageNum++;
+              setTimeout(renderNextPage,50);
+            }).catch(reject);
+          }).catch(reject);
+        }
+        renderNextPage();
+      }).catch(reject);
+    };
+    reader.onerror=reject;
+    reader.readAsArrayBuffer(file);
   });
 }
 function convertPPTToImages(file){
@@ -458,7 +560,6 @@ function convertPPTToImages(file){
             const ctx=canvas.getContext('2d');
             ctx.fillStyle='#ffffff';
             ctx.fillRect(0,0,canvas.width,canvas.height);
-            // Try to render slide text content
             if(slide.shapes){
               slide.shapes.forEach(shape=>{
                 if(shape.text&&shape.text.text){
@@ -488,6 +589,7 @@ function convertPPTToImages(file){
     reader.readAsArrayBuffer(file);
   });
 }
+
 function deleteCOAImage(idx){
   if(!confirm('确定删除这张COA报告图片？'))return;
   currentEditingCOABatch.images.splice(idx,1);
