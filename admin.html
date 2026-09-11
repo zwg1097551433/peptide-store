@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PeptideLab 管理后台</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap">
+<style>
+:root{--primary:#0d7377;--primary-dark:#095457;--primary-light:#14919b;--primary-bg:#e8f4f4;--accent:#c8923a;--bg:#f0f4f4;--surface:#fff;--text:#162828;--text-muted:#5c7575;--text-light:#8aa0a0;--border:#dce6e6;--border-light:#eaf0f0;--danger:#c0392b;--danger-bg:#fde8e8;--radius:10px;--radius-sm:6px;--font-display:'Space Grotesk',system-ui,sans-serif;--font-body:'DM Sans','Microsoft YaHei',system-ui,sans-serif}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+input,select,textarea{font-family:inherit;font-size:14px}
+
+/* Login Screen */
+.login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,var(--primary-dark),var(--primary))}
+.login-box{background:var(--surface);border-radius:var(--radius);padding:40px;width:380px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.login-box h1{font-family:var(--font-display);font-size:22px;color:var(--primary);margin-bottom:6px;text-align:center}
+.login-box p{font-size:13px;color:var(--text-muted);text-align:center;margin-bottom:24px}
+.login-box label{display:block;font-size:13px;font-weight:500;margin-bottom:6px;color:var(--text-muted)}
+.login-box input{width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);outline:none;margin-bottom:16px;font-size:14px}
+.login-box input:focus{border-color:var(--primary)}
+.login-box button{width:100%;padding:12px;background:var(--primary);color:#fff;border-radius:var(--radius-sm);font-weight:600;font-size:15px;transition:background .2s}
+.login-box button:hover{background:var(--primary-dark)}
+.login-error{color:var(--danger);font-size:13px;text-align:center;margin-top:10px;display:none}
+
+/* Admin Layout */
+.admin-layout{display:none;min-height:100vh}
+.admin-sidebar{width:220px;background:var(--primary-dark);color:#fff;padding:20px 0;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:10}
+.admin-logo{font-family:var(--font-display);font-size:18px;font-weight:700;padding:0 20px 20px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:12px}
+.admin-nav-item{padding:11px 20px;cursor:pointer;font-size:14px;display:flex;align-items:center;gap:10px;transition:background .15s;color:rgba(255,255,255,.8)}
+.admin-nav-item:hover{background:rgba(255,255,255,.1);color:#fff}
+.admin-nav-item.active{background:var(--primary);color:#fff;font-weight:600;border-left:3px solid var(--accent)}
+.admin-nav-item svg{width:16px;height:16px;flex-shrink:0}
+.admin-main{margin-left:220px;padding:24px 32px;flex:1}
+.admin-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.admin-topbar h2{font-family:var(--font-display);font-size:22px}
+.admin-topbar .actions{display:flex;gap:10px;align-items:center}
+.btn{padding:8px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:5px;transition:all .15s}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-dark)}
+.btn-secondary{background:var(--bg);color:var(--text-muted);border:1px solid var(--border)}
+.btn-secondary:hover{background:var(--border)}
+.btn-danger{background:var(--danger-bg);color:var(--danger)}
+.btn-danger:hover{background:#f8d0d0}
+.btn-sm{padding:4px 10px;font-size:12px}
+
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:24px}
+.stat-card{background:var(--surface);border:1px solid var(--border-light);border-radius:var(--radius);padding:16px 18px}
+.stat-value{font-family:var(--font-display);font-size:26px;font-weight:700;color:var(--primary)}
+.stat-label{font-size:12px;color:var(--text-muted);margin-top:2px}
+
+/* Table */
+.panel{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border-light);padding:18px;overflow-x:auto}
+.panel-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.admin-table{width:100%;border-collapse:collapse;font-size:13px;min-width:600px}
+.admin-table th{text-align:left;padding:10px 12px;background:var(--bg);font-weight:600;color:var(--text-muted);border-bottom:1px solid var(--border);font-size:11px;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+  .user-suggest-dropdown{position:absolute;background:#fff;border:1px solid #ddd;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.15);max-height:200px;overflow-y:auto;z-index:100;width:100%;margin-top:2px}
+  .user-suggest-item{padding:8px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid #f0f0f0}
+  .user-suggest-item:hover{background:#f0f7ff}
+  .user-suggest-item .uname{font-weight:600}
+  .user-suggest-item .uemail{color:#999;font-size:11px}
+.admin-table td{padding:10px 12px;border-bottom:1px solid var(--border-light);vertical-align:top}
+.admin-table tr:hover td{background:var(--bg)}
+.admin-empty{text-align:center;padding:40px;color:var(--text-light);font-size:14px}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:var(--radius);max-width:600px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface);z-index:1}
+.modal-header h3{font-family:var(--font-display);font-size:17px}
+.modal-close{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--text-muted)}
+.modal-close:hover{background:var(--bg)}
+.modal-body{padding:20px}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:13px;font-weight:500;margin-bottom:5px;color:var(--text-muted)}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);outline:none;transition:border-color .15s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--primary)}
+.form-group textarea{min-height:80px;resize:vertical}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-actions{display:flex;gap:10px;margin-top:18px}
+.form-actions button{flex:1;padding:11px;border-radius:var(--radius-sm);font-weight:600;font-size:14px}
+.spec-editor{margin-bottom:10px}
+.spec-row-editor{display:flex;gap:8px;margin-bottom:8px;align-items:center}
+.spec-row-editor input{flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:4px}
+.spec-row-editor .spec-price-input{max-width:110px}
+.spec-remove{width:30px;height:30px;border-radius:4px;background:var(--danger-bg);color:var(--danger);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.spec-add{padding:6px 12px;background:var(--primary-bg);color:var(--primary);border-radius:var(--radius-sm);font-size:12px;font-weight:600}
+.upload-row{display:flex;gap:8px;align-items:center}
+.upload-row input{flex:1}
+.upload-btn{padding:8px 14px;background:var(--primary-bg);color:var(--primary);border-radius:var(--radius-sm);font-size:12px;font-weight:600;white-space:nowrap;cursor:pointer;transition:background .15s;display:inline-flex;align-items:center;gap:4px}
+.upload-btn:hover{background:var(--primary);color:#fff}
+.upload-hint{font-size:11px;color:var(--text-light);margin-top:4px}
+.upload-preview{max-width:120px;max-height:80px;border-radius:4px;margin-top:6px;display:none}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:#fff;padding:10px 22px;border-radius:var(--radius-sm);font-size:13px;z-index:500;opacity:0;transition:all .3s;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.status-badge{padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
+.status-pending{background:#fef3cd;color:#92600a}
+.status-paid{background:#d4edda;color:#155724}
+.status-shipped{background:#cce5ff;color:#004085}
+.status-completed{background:#d4edda;color:#155724}
+@media(max-width:768px){
+.admin-sidebar{width:60px;padding:12px 0}
+.admin-logo{font-size:0;padding:0 0 12px;text-align:center}
+.admin-logo::after{content:'PL';font-size:16px}
+.admin-nav-item{padding:12px;justify-content:center;font-size:0}
+.admin-nav-item svg{width:20px;height:20px}
+.admin-main{margin-left:60px;padding:16px}
+.form-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- Login Screen -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <h1>PeptideLab 管理后台</h1>
+    <p>请输入管理员密码登录</p>
+    <label>管理员密码</label>
+    <input type="password" id="adminPassword" placeholder="请输入密码" onkeydown="if(event.key==='Enter')doLogin()">
+    <button onclick="doLogin()">登 录</button>
+    <div class="login-error" id="loginError">密码错误，请重试</div>
+  </div>
+</div>
+
+<!-- Admin Layout -->
+<div class="admin-layout" id="adminLayout">
+  <div class="admin-sidebar">
+    <div class="admin-logo">PeptideLab 后台</div>
+    <div class="admin-nav-item active" data-tab="dashboard" onclick="switchTab('dashboard')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>数据概览</div>
+    <div class="admin-nav-item" data-tab="products" onclick="switchTab('products')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3v6l-5 9a2 2 0 001.8 3h12.4a2 2 0 001.8-3l-5-9V3"/></svg>产品管理</div>
+    <div class="admin-nav-item" data-tab="categories" onclick="switchTab('categories')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>分类管理</div>
+    <div class="admin-nav-item" data-tab="announcements" onclick="switchTab('announcements')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg>公告管理</div>
+    <div class="admin-nav-item" data-tab="coa" onclick="switchTab('coa')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4"/></svg>COA管理</div>
+    <div class="admin-nav-item" data-tab="factory" onclick="switchTab('factory')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20"/><path d="M4 20V8l5 3V8l5 3V8l5 3v9"/></svg>工厂内容</div>
+    <div class="admin-nav-item" data-tab="forum" onclick="switchTab('forum')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>论坛管理</div>
+    <div class="admin-nav-item" data-tab="reviews" onclick="switchTab('reviews')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>评价管理</div>
+    <div class="admin-nav-item" data-tab="users" onclick="switchTab('users')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>用户管理</div>
+    <div class="admin-nav-item" data-tab="orders" onclick="switchTab('orders')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>订单管理</div>
+    <div class="admin-nav-item" data-tab="externalOrders" onclick="switchTab('externalOrders')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>站外订单</div>
+    <div class="admin-nav-item" data-tab="settings" onclick="switchTab('settings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>系统设置</div>
+  </div>
+  <div class="admin-main">
+    <div class="admin-topbar">
+      <h2 id="pageTitle">数据概览</h2>
+      <div class="actions">
+        <a href="index.html" target="_blank" class="btn btn-secondary">查看前台</a>
+        <button class="btn btn-secondary" onclick="logout()">退出登录</button>
+      </div>
+    </div>
+    <div id="adminContent"></div>
+  </div>
+</div>
+
+<!-- Entity Form Modal -->
+<div class="modal-overlay" id="entityModal">
+  <div class="modal">
+    <div class="modal-header"><h3 id="entityModalTitle">编辑</h3><button class="modal-close" onclick="closeModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="modal-body" id="entityModalBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== Data (injected from Excel) =====
+const DEFAULT_CATEGORIES = [{"id": "other-accessories", "name": "Other & Accessories", "subs": [{"id": "sub-1", "name": "AICAR Series", "products": ["p1"]}, {"id": "sub-2", "name": "Adamax Series", "products": ["p2"]}, {"id": "sub-3", "name": "PNC-27 Series", "products": ["p3"]}, {"id": "sub-4", "name": "Oxytocin Series", "products": ["p4"]}, {"id": "sub-5", "name": "Bacteriostatic Water", "products": ["p5", "p6"]}, {"id": "sub-6", "name": "Other", "products": ["p7", "p8", "p9", "p10", "p11", "p12", "p13"]}, {"id": "sub-7", "name": "Dermorphin Series", "products": ["p14"]}, {"id": "sub-8", "name": "EPO (Erythropoietin) Series", "products": ["p15"]}, {"id": "sub-9", "name": "Acetic Acid", "products": ["p16"]}]}, {"id": "weight-loss-fat-burning", "name": "Weight Loss & Fat Burning", "subs": [{"id": "sub-10", "name": "AOD9604 Series", "products": ["p17"]}, {"id": "sub-11", "name": "Adipotide/FTTP Series", "products": ["p18"]}, {"id": "sub-12", "name": "TR Series (Tirzepatide)", "products": ["p19"]}, {"id": "sub-13", "name": "RT Series (Retatrutide)", "products": ["p20"]}, {"id": "sub-14", "name": "Semaglutide Series", "products": ["p21"]}, {"id": "sub-15", "name": "Cagrilintide Series", "products": ["p22"]}, {"id": "sub-16", "name": "Cagrisema Series", "products": ["p23", "p24", "p25"]}, {"id": "sub-17", "name": "Mazdutide Series", "products": ["p26"]}, {"id": "sub-18", "name": "Liraglutide Series", "products": ["p27"]}, {"id": "sub-19", "name": "Dulaglutide Series", "products": ["p28"]}, {"id": "sub-20", "name": "Survodutide Series", "products": ["p29"]}, {"id": "sub-21", "name": "5-AMINO-1MQ Series", "products": ["p30"]}, {"id": "sub-22", "name": "CBL-514 Series", "products": ["p31"]}, {"id": "sub-23", "name": "SLU-PP-322 Series", "products": ["p32"]}, {"id": "sub-24", "name": "Lipo-C & Lipolytic Injections Series", "products": ["p33", "p34", "p35", "p36", "p37", "p38", "p39", "p40", "p41"]}]}, {"id": "repair-healing-peptides", "name": "Repair & Healing Peptides", "subs": [{"id": "sub-25", "name": "BPC-157 Series", "products": ["p42"]}, {"id": "sub-26", "name": "BPC + TB500 Blend Series", "products": ["p43", "p44", "p45", "p46", "p47"]}, {"id": "sub-27", "name": "TB-500 Series", "products": ["p48"]}, {"id": "sub-28", "name": "KPV Series", "products": ["p49"]}, {"id": "sub-29", "name": "Thymosin Alpha 1 Series", "products": ["p50"]}, {"id": "sub-30", "name": "Thymalin Series", "products": ["p51"]}, {"id": "sub-31", "name": "ARA290 (Cibinetide) Series", "products": ["p52"]}, {"id": "sub-32", "name": "LL-37 Series", "products": ["p53"]}]}, {"id": "muscle-building-recovery", "name": "Muscle Building & Recovery", "subs": [{"id": "sub-33", "name": "CJC-1295 Series", "products": ["p54", "p55", "p56"]}, {"id": "sub-34", "name": "Ipamorelin Series", "products": ["p57"]}, {"id": "sub-35", "name": "Tesamorelin Series", "products": ["p58", "p59"]}, {"id": "sub-36", "name": "Sermorelin Series", "products": ["p60"]}, {"id": "sub-37", "name": "Gonadorelin Series", "products": ["p61"]}, {"id": "sub-38", "name": "GHRP-2 Series", "products": ["p62"]}, {"id": "sub-39", "name": "GHRP-6 Series", "products": ["p63"]}, {"id": "sub-40", "name": "Hexarelin Series", "products": ["p64"]}, {"id": "sub-41", "name": "HCG Series", "products": ["p65"]}, {"id": "sub-42", "name": "HGH Series", "products": ["p66"]}, {"id": "sub-43", "name": "IGF-1 LR3 Series", "products": ["p67"]}, {"id": "sub-44", "name": "Frag 17-23 Series", "products": ["p68"]}, {"id": "sub-45", "name": "FST-344 / Myostatin Series", "products": ["p69", "p70", "p71", "p72"]}, {"id": "sub-46", "name": "MK-677 Series", "products": ["p73"]}]}, {"id": "nootropic-neuropeptides", "name": "Nootropic & Neuropeptides", "subs": [{"id": "sub-47", "name": "DSIP Series", "products": ["p74"]}, {"id": "sub-48", "name": "Dihexa Series", "products": ["p75"]}, {"id": "sub-49", "name": "Selank Series", "products": ["p76"]}, {"id": "sub-50", "name": "Semax Series", "products": ["p77"]}, {"id": "sub-51", "name": "PE-22-28 Series", "products": ["p78"]}, {"id": "sub-52", "name": "Kisspeptin-10 Series", "products": ["p79"]}, {"id": "sub-53", "name": "Cerebrolysin Series", "products": ["p80"]}, {"id": "sub-54", "name": "Orexin Series", "products": ["p81", "p82"]}, {"id": "sub-55", "name": "Other Neuropeptides Series", "products": ["p83"]}]}, {"id": "anti-aging-mitochondrial", "name": "Anti-Aging & Mitochondrial", "subs": [{"id": "sub-56", "name": "Epithalon Series", "products": ["p84"]}, {"id": "sub-57", "name": "MOTS-c Series", "products": ["p85"]}, {"id": "sub-58", "name": "Humanin Series", "products": ["p86"]}, {"id": "sub-59", "name": "NAD+ Series", "products": ["p87"]}, {"id": "sub-60", "name": "Glutathione Series", "products": ["p88"]}, {"id": "sub-61", "name": "SS-31 (Elamipretide) Series", "products": ["p89"]}, {"id": "sub-62", "name": "Bioregulator Peptides", "products": ["p90", "p91", "p92", "p93"]}]}, {"id": "beauty-skin-care", "name": "Beauty & Skin Care", "subs": [{"id": "sub-63", "name": "GHK-Cu (Copper Peptide) Series", "products": ["p94"]}, {"id": "sub-64", "name": "AHK-CU Series", "products": ["p95"]}, {"id": "sub-65", "name": "Snap-8 Series", "products": ["p96"]}, {"id": "sub-66", "name": "Matrixyl Series", "products": ["p97"]}, {"id": "sub-67", "name": "Melanotan Series", "products": ["p98", "p99"]}, {"id": "sub-68", "name": "PTD-DBM Series", "products": ["p100"]}, {"id": "sub-69", "name": "Botulinum Toxin Series", "products": ["p101"]}]}];
+const DEFAULT_PRODUCTS = [{"id": "p1", "name": "AICAR", "cat": "other-accessories", "sub": "sub-1", "desc": "Helps support cellular metabolism and endurance by activating the AMPK signaling pathway, which may enhance muscular endurance and fat metabolism.", "specs": [{"label": "50mg", "price": 52.0}], "clicks": 0}, {"id": "p2", "name": "Adamax", "cat": "other-accessories", "sub": "sub-2", "desc": "Growth hormone-releasing peptide (GHRP-like compound) used to increase growth hormone secretion, support muscle growth, improve fat metabolism, and enhance recovery capacity.", "specs": [{"label": "5mg", "price": 118.0}, {"label": "10mg", "price": 205.0}], "clicks": 0}, {"id": "p3", "name": "PNC-27", "cat": "other-accessories", "sub": "sub-3", "desc": "Anticancer peptides can selectively target p53-MDM2 related structures on cancer cell membranes and induce cancer cell apoptosis.", "specs": [{"label": "5mg", "price": 178.0}], "clicks": 0}, {"id": "p4", "name": "Oxytocin Acetate", "cat": "other-accessories", "sub": "sub-4", "desc": "Mainly used to stimulate uterine contraction, improve mood and social behavior. It may be applied in medical and experimental research to regulate emotions and enhance intimacy.", "specs": [{"label": "5mg", "price": 89.0}, {"label": "10mg", "price": 137.0}], "clicks": 0}, {"id": "p5", "name": "Bacteriostatic Water 0.9% (WA)", "cat": "other-accessories", "sub": "sub-5", "desc": "Sterile water is usually used together with lyophilized powder and is considered an essential product.", "specs": [{"label": "3ml", "price": 8.0}, {"label": "5ml", "price": 8.0}, {"label": "10ml", "price": 13.0}], "clicks": 0}, {"id": "p6", "name": "Bacteriostatic Water 0.9% (BAC)", "cat": "other-accessories", "sub": "sub-5", "desc": "", "specs": [{"label": "3ml", "price": 8.0}, {"label": "5ml", "price": 8.0}, {"label": "10ml", "price": 11.0}], "clicks": 0}, {"id": "p7", "name": "bronchogen", "cat": "other-accessories", "sub": "sub-6", "desc": "Bioregulator peptide studied for its potential to support bronchial and respiratory tissue function and lung health.", "specs": [{"label": "20mg", "price": 102.0}], "clicks": 0}, {"id": "p8", "name": "Cartalax", "cat": "other-accessories", "sub": "sub-6", "desc": "Joint support and repair peptide that may help promote cartilage repair, improve joint health, and relieve joint pain and inflammation.", "specs": [{"label": "20mg", "price": 100.0}], "clicks": 0}, {"id": "p9", "name": "VIP", "cat": "other-accessories", "sub": "sub-6", "desc": "Vasoactive intestinal peptide (VIP) studied for its potential to support vasodilation, circadian rhythm, immune balance, and gastrointestinal function.", "specs": [{"label": "5mg", "price": 113.0}, {"label": "10mg", "price": 205.0}], "clicks": 0}, {"id": "p10", "name": "ACTH 1-39", "cat": "other-accessories", "sub": "sub-6", "desc": "It stimulates the adrenal cortex to secrete cortisol and other glucocorticoids, and is used for anti-inflammation, immune regulation, treatment of adrenal insufficiency and certain skin and immune diseases.", "specs": [{"label": "5mg", "price": 108.0}], "clicks": 0}, {"id": "p11", "name": "AP5", "cat": "other-accessories", "sub": "sub-6", "desc": "Experimental nootropic research peptide from the Semax/Adamax family, studied for its potential to support cognitive function, focus, and mental performance.", "specs": [{"label": "5mg", "price": 205.0}], "clicks": 0}, {"id": "p12", "name": "AP10", "cat": "other-accessories", "sub": "sub-6", "desc": "Experimental nootropic research peptide from the Semax/Adamax family, studied for its potential to support cognitive function, focus, and mental performance.", "specs": [{"label": "10mg", "price": 431.0}], "clicks": 0}, {"id": "p13", "name": "F410", "cat": "other-accessories", "sub": "sub-6", "desc": "Experimental anti-aging peptide that may selectively induce apoptosis of senescent cells, with potential benefits for slowing aging and improving tissue function.", "specs": [{"label": "10mg", "price": 458.0}], "clicks": 0}, {"id": "p14", "name": "Dermorphin", "cat": "other-accessories", "sub": "sub-7", "desc": "Potent opioid peptides act on μ-opioid receptors, exerting analgesic effects and potentially enhancing exercise endurance.", "specs": [{"label": "5mg", "price": 81.0}, {"label": "10mg", "price": 129.0}, {"label": "20mg", "price": 215.0}], "clicks": 0}, {"id": "p15", "name": "EPO (Erythropoietin)", "cat": "other-accessories", "sub": "sub-8", "desc": "Promotes erythropoiesis, enhances blood oxygen carrying capacity, boosts stamina and physical fitness, commonly used for anemia treatment and endurance improvement.", "specs": [{"label": "3000iu", "price": 97.0}], "clicks": 0}, {"id": "p16", "name": "Acetic Acid Water 0.6%", "cat": "other-accessories", "sub": "sub-9", "desc": "Sterile diluent commonly used together with lyophilized peptide powder for reconstitution before injection.", "specs": [{"label": "3ml", "price": 8.0}, {"label": "10ml", "price": 11.0}], "clicks": 0}, {"id": "p17", "name": "AOD9604", "cat": "weight-loss-fat-burning", "sub": "sub-10", "desc": "Used for fat loss and weight management. Helps promote fat metabolism without affecting blood sugar levels.", "specs": [{"label": "5mg", "price": 121.0}, {"label": "10mg", "price": 205.0}], "clicks": 0}, {"id": "p18", "name": "Adipotide (FTTP)", "cat": "weight-loss-fat-burning", "sub": "sub-11", "desc": "Experimental fat-loss peptide designed to target blood vessels in fat tissue, helping reduce fat mass and support weight management.", "specs": [{"label": "5mg", "price": 129.0}], "clicks": 0}, {"id": "p19", "name": "Tirzepatide", "cat": "weight-loss-fat-burning", "sub": "sub-12", "desc": "Used for weight loss and improved blood sugar control. Acts on both GLP-1 and GIP receptors to help reduce appetite, promote fat metabolism, support weight reduction, and improve insulin sensitivity.", "specs": [{"label": "5mg", "price": 43.0}, {"label": "10mg", "price": 70.0}, {"label": "15mg", "price": 102.0}, {"label": "20mg", "price": 124.0}, {"label": "30mg", "price": 167.0}, {"label": "40mg", "price": 210.0}, {"label": "50mg", "price": 264.0}, {"label": "60mg", "price": 328.0}, {"label": "80mg", "price": 458.0}, {"label": "100mg", "price": 512.0}, {"label": "120mg", "price": 652.0}], "clicks": 0}, {"id": "p20", "name": "Retatrutide", "cat": "weight-loss-fat-burning", "sub": "sub-13", "desc": "Experimental weight loss compound that may help regulate appetite and improve glucose metabolism, supporting fat loss and weight management.", "specs": [{"label": "5mg", "price": 47.0}, {"label": "10mg", "price": 78.0}, {"label": "15mg", "price": 112.0}, {"label": "20mg", "price": 142.0}, {"label": "30mg", "price": 198.0}, {"label": "40mg", "price": 258.0}, {"label": "50mg", "price": 323.0}, {"label": "60mg", "price": 379.0}, {"label": "80mg", "price": 431.0}, {"label": "100mg", "price": 560.0}], "clicks": 0}, {"id": "p21", "name": "Semaglutide", "cat": "weight-loss-fat-burning", "sub": "sub-14", "desc": "Used for weight loss and improved blood sugar control. Acts on both GLP-1 and GIP receptors to help reduce appetite, promote fat metabolism, support weight reduction, and improve insulin sensitivity.", "specs": [{"label": "5mg", "price": 38.0}, {"label": "10mg", "price": 48.0}, {"label": "15mg", "price": 59.0}, {"label": "20mg", "price": 78.0}, {"label": "30mg", "price": 108.0}, {"label": "40mg", "price": 137.0}, {"label": "50mg", "price": 162.0}], "clicks": 0}, {"id": "p22", "name": "Cagrilintide", "cat": "weight-loss-fat-burning", "sub": "sub-15", "desc": "Used for weight loss and metabolic health support. Helps regulate appetite, control blood sugar levels, and support fat reduction.", "specs": [{"label": "5mg", "price": 153.0}, {"label": "10mg", "price": 240.0}], "clicks": 0}, {"id": "p23", "name": "Cagrisema (2.5mg+2.5mg)", "cat": "weight-loss-fat-burning", "sub": "sub-16", "desc": "Combination of Cagrilintide and Semaglutide. Acts on amylin and GLP-1/GIP pathways to help reduce appetite, support blood sugar control, and promote weight management.", "specs": [{"label": "5mg", "price": 81.0}], "clicks": 0}, {"id": "p24", "name": "Cagrisema (5mg+5mg)", "cat": "weight-loss-fat-burning", "sub": "sub-16", "desc": "", "specs": [{"label": "10mg", "price": 129.0}], "clicks": 0}, {"id": "p25", "name": "Cagrisema (10mg+10mg)", "cat": "weight-loss-fat-burning", "sub": "sub-16", "desc": "", "specs": [{"label": "20mg", "price": 242.0}], "clicks": 0}, {"id": "p26", "name": "Mazdutide", "cat": "weight-loss-fat-burning", "sub": "sub-17", "desc": "Experimental weight loss compound that acts on GLP-1/GIP receptors to help suppress appetite, promote fat metabolism, support weight loss, and improve blood sugar control.", "specs": [{"label": "5mg", "price": 140.0}, {"label": "10mg", "price": 253.0}], "clicks": 0}, {"id": "p27", "name": "Liraglutide", "cat": "weight-loss-fat-burning", "sub": "sub-18", "desc": "GLP-1 receptor agonist used to help lower blood sugar, support fat loss and weight management, promote insulin secretion, and delay gastric emptying.", "specs": [{"label": "5mg", "price": 65.0}, {"label": "10mg", "price": 118.0}, {"label": "30mg", "price": 318.0}], "clicks": 0}, {"id": "p28", "name": "Dulaglutide", "cat": "weight-loss-fat-burning", "sub": "sub-19", "desc": "GLP-1 receptor agonist used to help lower blood sugar levels by promoting insulin secretion and delaying gastric emptying. May also support fat loss and weight management.", "specs": [{"label": "5mg", "price": 188.0}, {"label": "10mg", "price": 312.0}], "clicks": 0}, {"id": "p29", "name": "Survodutide", "cat": "weight-loss-fat-burning", "sub": "sub-20", "desc": "Experimental peptide compound that may support metabolic regulation, with potential benefits for blood sugar control, fat loss, and improved glucose tolerance.", "specs": [{"label": "5mg", "price": 312.0}, {"label": "10mg", "price": 533.0}], "clicks": 0}, {"id": "p30", "name": "5-AMINO-1MQ", "cat": "weight-loss-fat-burning", "sub": "sub-21", "desc": "Amino acid or peptide-derived compound used to support muscle recovery, enhance protein synthesis, reduce fatigue, and improve athletic performance.", "specs": [{"label": "5mg", "price": 35.0}, {"label": "10mg", "price": 70.0}, {"label": "50mg", "price": 248.0}], "clicks": 0}, {"id": "p31", "name": "CBL-514", "cat": "weight-loss-fat-burning", "sub": "sub-22", "desc": "Injectable research compound that selectively induces adipocyte (fat cell) apoptosis, studied for targeted reduction of stubborn subcutaneous fat and body contouring.", "specs": [{"label": "5mg", "price": 183.0}, {"label": "10mg", "price": 366.0}, {"label": "20mg", "price": 490.0}], "clicks": 0}, {"id": "p32", "name": "SLU-PP-322", "cat": "weight-loss-fat-burning", "sub": "sub-23", "desc": "Experimental peptide or small-molecule compound primarily intended for research purposes, with potential applications in anti-aging, metabolic regulation, or cellular protection.", "specs": [{"label": "5mg", "price": 145.0}], "clicks": 0}, {"id": "p33", "name": "LC120", "cat": "weight-loss-fat-burning", "sub": "sub-24", "desc": "Commonly used for fat loss and fat-burning support. Helps promote fat metabolism and may enhance energy levels.", "specs": [{"label": "10ml", "price": 43.0}], "clicks": 0}, {"id": "p34", "name": "LC216", "cat": "weight-loss-fat-burning", "sub": "sub-24", "desc": "Commonly used for fat loss and fat-burning support. Helps promote fat metabolism and may enhance energy levels.", "specs": [{"label": "10ml", "price": 70.0}], "clicks": 0}, {"id": "p35", "name": "LC400", "cat": "weight-loss-fat-burning", "sub": "sub-24", "desc": "Commonly used for fat loss and fat-burning support. Helps promote fat metabolism and may enhance energy levels.", "specs": [{"label": "10ml", "price": 65.0}], "clicks": 0}, {"id": "p36", "name": "LC526", "cat": "weight-loss-fat-burning", "sub": "sub-24", "desc": "Commonly used for fat loss and fat-burning support. Helps promote fat metabolism and may enhance energy levels.", "specs": [{"label": "10ml", "price": 81.0}], "clicks": 0}, {"id": "p37", "name": "HHB", "cat": "weight-loss-fat-burning", "sub": "sub-24", "desc": "Lipolytic injectable solution designed to help break down localized fat, support fat metabolism, and improve body contouring.", "specs": [{"label": "10ml", "price": 65.0}], "clicks": 0}, {"id": "p38", "name": "SHB", "cat": "weight-loss-fat-burning", "sub": "sub-24", "desc": "Lipolytic injectable solution designed to help break down localized fat, support fat metabolism, and improve body contouring.", "specs": [{"label": "10ml", "price": 65.0}], "clicks": 0}, {"id": "p39", "name": "Lemon Bottle", "cat": "weight-loss-fat-burning", "sub": "sub-24", "desc": "Lipolytic injection blend (riboflavin, bromelain and lecithin) commonly used to help dissolve localized fat and reduce swelling.", "specs": [{"label": "10ml", "price": 97.0}], "clicks": 0}, {"id": "p40", "name": "Lipo-C with Vitamin B12", "cat": "weight-loss-fat-burning", "sub": "sub-24", "desc": "Lipotropic injectable blend designed to support fat breakdown, improve energy metabolism, and assist with fat loss, while providing vitamin B12 to help enhance energy levels.", "specs": [{"label": "10mg", "price": 151.0}], "clicks": 0}, {"id": "p41", "name": "Vitamin B12", "cat": "weight-loss-fat-burning", "sub": "sub-24", "desc": "Methylcobalamin (vitamin B12) injection used to support energy metabolism, red blood cell formation, and nerve function.", "specs": [{"label": "10ml", "price": 86.0}], "clicks": 0}, {"id": "p42", "name": "BPC 157", "cat": "repair-healing-peptides", "sub": "sub-25", "desc": "Promotes soft tissue, tendon, and ligament repair, supports faster wound healing, and may help improve joint health and digestive system function.", "specs": [{"label": "5mg", "price": 58.0}, {"label": "10mg", "price": 78.0}], "clicks": 0}, {"id": "p43", "name": "BPC5mg+TB5mg", "cat": "repair-healing-peptides", "sub": "sub-26", "desc": "Combined action: BPC-157 supports localized tissue and tendon repair, while TB-500 promotes the repair and regeneration of muscles, connective tissue, and blood vessels. Combined use may enhance recovery speed, reduce inflammation, and support recovery from sports-related injuries.", "specs": [{"label": "10mg", "price": 102.0}], "clicks": 0}, {"id": "p44", "name": "BPC10mg+TB10mg", "cat": "repair-healing-peptides", "sub": "sub-26", "desc": "Combined action: BPC-157 supports localized tissue and tendon repair, while TB-500 promotes the repair and regeneration of muscles, connective tissue, and blood vessels. Combined use may enhance recovery speed, reduce inflammation, and support recovery from sports-related injuries.", "specs": [{"label": "20mg", "price": 194.0}], "clicks": 0}, {"id": "p45", "name": "BPC15mg+TB15mg", "cat": "repair-healing-peptides", "sub": "sub-26", "desc": "Combined action: BPC-157 supports localized tissue and tendon repair, while TB-500 promotes the repair and regeneration of muscles, connective tissue, and blood vessels. Combined use may enhance recovery speed, reduce inflammation, and support recovery from sports-related injuries.", "specs": [{"label": "30mg", "price": 248.0}], "clicks": 0}, {"id": "p46", "name": "BPC157 10mg + GHK-Cu 50mg + TB500 10mg", "cat": "repair-healing-peptides", "sub": "sub-26", "desc": "Combined action: BPC-157 supports the repair of localized tissue, tendons, and ligaments; GHK-Cu promotes skin repair, anti-inflammatory support, anti-aging benefits, and wound healing; while TB-500 helps accelerate the repair of muscles, connective tissue, and blood vessels. Combined use may significantly enhance recovery speed, reduce inflammation, and support tissue regeneration.", "specs": [{"label": "70mg", "price": 188.0}], "clicks": 0}, {"id": "p47", "name": "BPC157 10mg + GHK-Cu 50mg + TB500 10mg + KPV 10mg", "cat": "repair-healing-peptides", "sub": "sub-26", "desc": "BPC-157: Supports the repair of tendons, ligaments, muscles, and gastrointestinal tissue.\n\nTB-500: Helps accelerate whole-body muscle and connective tissue repair while supporting blood vessel regeneration.\n\nGHK-Cu: Provides anti-inflammatory and antioxidant support, while promoting skin repair and wound healing.\n\nKPV: May support anti-inflammatory effects, immune modulation, and improved tissue healing.\n\nCombined use may significantly accelerate soft tissue recovery, reduce inflammation, and enhance tissue regeneration and repair capacity.", "specs": [{"label": "80mg", "price": 221.0}], "clicks": 0}, {"id": "p48", "name": "TB500 (Thymosin B4 Acetate)", "cat": "repair-healing-peptides", "sub": "sub-27", "desc": "Promotes the repair of muscles, tendons, and ligaments, supports faster wound healing, and helps improve joint flexibility and recovery capacity.", "specs": [{"label": "5mg", "price": 97.0}, {"label": "10mg", "price": 167.0}], "clicks": 0}, {"id": "p49", "name": "KPV", "cat": "repair-healing-peptides", "sub": "sub-28", "desc": "Has anti-inflammatory and immunomodulatory effects, and may help improve skin inflammation, wound healing, and gut health.", "specs": [{"label": "5mg", "price": 48.0}, {"label": "10mg", "price": 70.0}], "clicks": 0}, {"id": "p50", "name": "Thymosin Alpha 1", "cat": "repair-healing-peptides", "sub": "sub-29", "desc": "Thymosin Alpha-1 is an immunomodulatory peptide that may help enhance immune function, promote T-lymphocyte activation, and support antiviral activity. It is commonly used for immune support and infection defense.\n\nThymosin Alpha-1 and Thymalin are both immunomodulatory peptides, but Thymosin Alpha-1 is more commonly associated with antiviral support and enhanced immune response, with a more targeted role in T-cell activation.", "specs": [{"label": "5mg", "price": 124.0}, {"label": "10mg", "price": 232.0}], "clicks": 0}, {"id": "p51", "name": "Thymalin", "cat": "repair-healing-peptides", "sub": "sub-30", "desc": "Immunomodulatory peptide that may help enhance immune function, promote the differentiation and maturation of T lymphocytes, and support anti-aging and infection defense.", "specs": [{"label": "10mg", "price": 102.0}], "clicks": 0}, {"id": "p52", "name": "ARA 290 (Cibinetide)", "cat": "repair-healing-peptides", "sub": "sub-31", "desc": "Erythropoietin (EPO)-derived peptide primarily used for neuroprotection, anti-inflammatory support, and tissue repair. May help reduce chronic pain and support recovery from nerve damage.", "specs": [{"label": "10mg", "price": 145.0}, {"label": "16mg", "price": 183.0}], "clicks": 0}, {"id": "p53", "name": "LL-37", "cat": "repair-healing-peptides", "sub": "sub-32", "desc": "Antimicrobial cathelicidin peptide studied for its potential immunomodulatory, wound-healing, and skin-repair effects.", "specs": [{"label": "5mg", "price": 118.0}], "clicks": 0}, {"id": "p54", "name": "CJC 1295 (without DAC)", "cat": "muscle-building-recovery", "sub": "sub-33", "desc": "Helps stimulate growth hormone secretion, support muscle gain, improve fat metabolism, and enhance recovery.", "specs": [{"label": "5mg", "price": 100.0}, {"label": "10mg", "price": 153.0}], "clicks": 0}, {"id": "p55", "name": "CJC 1295 with DAC", "cat": "muscle-building-recovery", "sub": "sub-33", "desc": "Helps stimulate growth hormone secretion, support muscle gain, improve fat metabolism, and enhance recovery, with a longer duration of action compared to the Without DAC version.", "specs": [{"label": "5mg", "price": 205.0}, {"label": "10mg", "price": 372.0}], "clicks": 0}, {"id": "p56", "name": "CJC 1295 (without DAC) 5mg + Ipamorelin 5mg", "cat": "muscle-building-recovery", "sub": "sub-33", "desc": "Combined use may significantly enhance growth hormone secretion, support muscle gain, improve fat metabolism and recovery, while potentially helping improve sleep quality.", "specs": [{"label": "10mg", "price": 188.0}], "clicks": 0}, {"id": "p57", "name": "Ipamorelin", "cat": "muscle-building-recovery", "sub": "sub-34", "desc": "Helps stimulate growth hormone secretion, support muscle gain, improve fat metabolism, and enhance recovery, while potentially having positive effects on sleep quality.", "specs": [{"label": "5mg", "price": 54.0}, {"label": "10mg", "price": 75.0}], "clicks": 0}, {"id": "p58", "name": "Tesamorelin", "cat": "muscle-building-recovery", "sub": "sub-35", "desc": "Growth hormone-releasing hormone (GHRH) peptide used to increase growth hormone secretion, improve fat distribution—especially abdominal fat—and may support anti-aging and body composition improvement.", "specs": [{"label": "5mg", "price": 129.0}, {"label": "10mg", "price": 248.0}, {"label": "20mg", "price": 463.0}], "clicks": 0}, {"id": "p59", "name": "Tesamorelin 5mg + Ipamorelin 5mg", "cat": "muscle-building-recovery", "sub": "sub-35", "desc": "Combined GHRH plus GHRP stack that may strongly stimulate growth hormone secretion, supporting muscle gain, fat metabolism, and recovery.", "specs": [{"label": "10mg", "price": 97.0}], "clicks": 0}, {"id": "p60", "name": "Sermorelin", "cat": "muscle-building-recovery", "sub": "sub-36", "desc": "Helps stimulate growth hormone secretion, support muscle gain, improve fat metabolism and recovery, while potentially improving sleep quality. Commonly used in hormone replacement therapy (HRT) protocols.", "specs": [{"label": "5mg", "price": 92.0}, {"label": "10mg", "price": 156.0}], "clicks": 0}, {"id": "p61", "name": "Gonadorelin", "cat": "muscle-building-recovery", "sub": "sub-37", "desc": "Promotes the release of gonadotropins (LH and FSH) and may be used in the diagnosis or treatment of gonadal dysfunction, while potentially supporting fertility improvement.", "specs": [{"label": "5mg", "price": 97.0}], "clicks": 0}, {"id": "p62", "name": "GHRP-2 Acetate", "cat": "muscle-building-recovery", "sub": "sub-38", "desc": "Helps stimulate growth hormone secretion, support muscle gain, improve fat metabolism and recovery, while potentially helping improve sleep quality.", "specs": [{"label": "5mg", "price": 60.0}, {"label": "10mg", "price": 83.0}], "clicks": 0}, {"id": "p63", "name": "GHRP-6 Acetate", "cat": "muscle-building-recovery", "sub": "sub-39", "desc": "Helps stimulate growth hormone secretion, support muscle gain, improve fat metabolism and recovery, and may be more likely to increase appetite compared to GHRP-2.", "specs": [{"label": "5mg", "price": 59.0}, {"label": "10mg", "price": 81.0}], "clicks": 0}, {"id": "p64", "name": "Hexarelin Acetate", "cat": "muscle-building-recovery", "sub": "sub-40", "desc": "Potent growth hormone-releasing peptide (GHRP) used to increase growth hormone secretion, support muscle growth, fat metabolism, and recovery capacity, while potentially helping improve cardiovascular function.", "specs": [{"label": "5mg", "price": 81.0}], "clicks": 0}, {"id": "p65", "name": "HCG", "cat": "muscle-building-recovery", "sub": "sub-41", "desc": "Primarily used to promote uterine contractions and support mood and social behavior regulation, with potential applications in medical and experimental research for emotional modulation and enhanced social bonding.", "specs": [{"label": "1000IU", "price": 43.0}, {"label": "2000IU", "price": 54.0}, {"label": "5000IU", "price": 86.0}, {"label": "10000IU", "price": 129.0}], "clicks": 0}, {"id": "p66", "name": "HGH 191AA (Somatropin)", "cat": "muscle-building-recovery", "sub": "sub-42", "desc": "Human Growth Hormone used to support muscle gain, improve fat metabolism, enhance recovery, and provide anti-aging benefits. May also help improve bone density and overall body composition.", "specs": [{"label": "6iu", "price": 43.0}, {"label": "8iu", "price": 65.0}, {"label": "10iu", "price": 86.0}, {"label": "12iu", "price": 108.0}, {"label": "15iu", "price": 129.0}, {"label": "24iu", "price": 167.0}, {"label": "36iu", "price": 215.0}, {"label": "40iu", "price": 248.0}], "clicks": 0}, {"id": "p67", "name": "IGF-1 LR3", "cat": "muscle-building-recovery", "sub": "sub-43", "desc": "Supports muscle growth, enhances recovery capacity, and increases protein synthesis to aid muscle building and athletic performance.", "specs": [{"label": "0.1mg", "price": 38.0}, {"label": "1mg", "price": 205.0}], "clicks": 0}, {"id": "p68", "name": "HGH Fragment 176-191 (1)", "cat": "muscle-building-recovery", "sub": "sub-44", "desc": "Lipolytic fragment of human growth hormone studied for its potential to promote fat breakdown, especially abdominal fat, with minimal effect on appetite or blood sugar.", "specs": [{"label": "1mg", "price": 54.0}], "clicks": 0}, {"id": "p69", "name": "Follistatin (FST-344)", "cat": "muscle-building-recovery", "sub": "sub-45", "desc": "May help inhibit muscle growth regulators such as myostatin, supporting muscle growth and strength enhancement, and may be used for muscle building and recovery.", "specs": [{"label": "1mg", "price": 188.0}], "clicks": 0}, {"id": "p70", "name": "FST-344", "cat": "muscle-building-recovery", "sub": "sub-45", "desc": "May help inhibit muscle growth regulators such as myostatin, supporting muscle growth and strength enhancement, and may be used for muscle building and recovery.", "specs": [{"label": "1mg", "price": 307.0}], "clicks": 0}, {"id": "p71", "name": "ACE-031 (ActRIIB)", "cat": "muscle-building-recovery", "sub": "sub-45", "desc": "Experimental protein antagonist that may inhibit muscle growth regulators such as myostatin, helping promote muscle growth.", "specs": [{"label": "1mg", "price": 158.0}], "clicks": 0}, {"id": "p72", "name": "GDF-8 (Myostatin)", "cat": "muscle-building-recovery", "sub": "sub-45", "desc": "Myostatin (GDF-8) regulates muscle growth; research compounds targeting it are studied for their potential to support muscle mass and strength.", "specs": [{"label": "1mg", "price": 205.0}], "clicks": 0}, {"id": "p73", "name": "MK-677 (Ibutamoren)", "cat": "muscle-building-recovery", "sub": "sub-46", "desc": "Oral ghrelin-receptor secretagogue studied for its potential to raise growth hormone and IGF-1 levels, supporting muscle mass, appetite, and sleep.", "specs": [{"label": "5mg", "price": 43.0}], "clicks": 0}, {"id": "p74", "name": "DSIP", "cat": "nootropic-neuropeptides", "sub": "sub-47", "desc": "May help improve sleep quality, regulate the sleep-wake cycle, and support relief from stress and anxiety.", "specs": [{"label": "5mg", "price": 62.0}, {"label": "10mg", "price": 85.0}], "clicks": 0}, {"id": "p75", "name": "Dihexa", "cat": "nootropic-neuropeptides", "sub": "sub-48", "desc": "Angiotensin-derived nootropic peptide studied for its potential to support cognitive function, memory, synaptic plasticity, and brain health.", "specs": [{"label": "5mg", "price": 65.0}, {"label": "10mg", "price": 113.0}], "clicks": 0}, {"id": "p76", "name": "Selank", "cat": "nootropic-neuropeptides", "sub": "sub-49", "desc": "Primarily used to support anxiety relief, cognitive function, and emotional stability, while potentially enhancing learning and memory capacity.", "specs": [{"label": "5mg", "price": 54.0}, {"label": "10mg", "price": 81.0}], "clicks": 0}, {"id": "p77", "name": "Semax", "cat": "nootropic-neuropeptides", "sub": "sub-50", "desc": "Nootropic neuropeptide studied for its potential to support focus, mental clarity, cognitive function, and emotional stability under stress.", "specs": [{"label": "5mg", "price": 54.0}, {"label": "10mg", "price": 81.0}], "clicks": 0}, {"id": "p78", "name": "PE-22-28", "cat": "nootropic-neuropeptides", "sub": "sub-51", "desc": "Cyclopeptide studied for its potential anxiolytic and antidepressant-like effects and its role in modulating serotonin and immune pathways.", "specs": [{"label": "5mg", "price": 75.0}, {"label": "10mg", "price": 124.0}], "clicks": 0}, {"id": "p79", "name": "Kisspeptin-10", "cat": "nootropic-neuropeptides", "sub": "sub-52", "desc": "Supports hypothalamic-pituitary-gonadal (HPG) axis hormone activity by stimulating the release of gonadotropins (LH and FSH), potentially helping improve reproductive health and hormonal balance.", "specs": [{"label": "5mg", "price": 65.0}, {"label": "10mg", "price": 92.0}], "clicks": 0}, {"id": "p80", "name": "Cerebrolysin", "cat": "nootropic-neuropeptides", "sub": "sub-53", "desc": "Neurotrophic peptide complex studied for its potential to support neuronal repair, cognitive function, memory, and brain recovery.", "specs": [{"label": "600mg", "price": 94.0}], "clicks": 0}, {"id": "p81", "name": "Orexin B", "cat": "nootropic-neuropeptides", "sub": "sub-54", "desc": "Orexin (hypocretin) neuropeptide studied for its role in wakefulness, arousal, motivation, appetite regulation, and energy balance.", "specs": [{"label": "5mg", "price": 129.0}, {"label": "10mg", "price": 264.0}], "clicks": 0}, {"id": "p82", "name": "Orexin A", "cat": "nootropic-neuropeptides", "sub": "sub-54", "desc": "Orexin (hypocretin) neuropeptide studied for its role in wakefulness, arousal, motivation, appetite regulation, and energy balance.", "specs": [{"label": "10mg", "price": 654.0}], "clicks": 0}, {"id": "p83", "name": "Melatonin", "cat": "nootropic-neuropeptides", "sub": "sub-55", "desc": "Helps regulate the sleep-wake cycle, improve sleep quality, and provide antioxidant and potential anti-aging support.", "specs": [{"label": "10mg", "price": 86.0}], "clicks": 0}, {"id": "p84", "name": "Epithalon", "cat": "anti-aging-mitochondrial", "sub": "sub-56", "desc": "Anti-aging peptide that may help extend cellular lifespan, improve sleep quality, regulate melatonin secretion, and support immune function and cellular repair.", "specs": [{"label": "10mg", "price": 89.0}, {"label": "50mg", "price": 291.0}], "clicks": 0}, {"id": "p85", "name": "MOTS-c (Human)", "cat": "anti-aging-mitochondrial", "sub": "sub-57", "desc": "Mitochondria-derived peptide that may help regulate energy metabolism, enhance insulin sensitivity, support fat metabolism and endurance, and provide potential anti-aging benefits.", "specs": [{"label": "10mg", "price": 92.0}, {"label": "15mg", "price": 124.0}, {"label": "20mg", "price": 151.0}, {"label": "40mg", "price": 275.0}], "clicks": 0}, {"id": "p86", "name": "Humanin", "cat": "anti-aging-mitochondrial", "sub": "sub-58", "desc": "Anti-aging peptide that may help protect mitochondrial function, provide antioxidant support, reduce cellular apoptosis, improve metabolic function, and support healthy aging.", "specs": [{"label": "10mg", "price": 366.0}], "clicks": 0}, {"id": "p87", "name": "NAD+", "cat": "anti-aging-mitochondrial", "sub": "sub-59", "desc": "Cellular energy metabolism coenzyme involved in mitochondrial function, anti-aging support, DNA repair, and enhanced energy production.", "specs": [{"label": "100mg", "price": 47.0}, {"label": "500mg", "price": 86.0}, {"label": "1000mg", "price": 151.0}], "clicks": 0}, {"id": "p88", "name": "Glutathione", "cat": "anti-aging-mitochondrial", "sub": "sub-60", "desc": "Potent antioxidant that helps protect cells from free radical damage, supports liver detoxification function, and may improve skin brightness, support anti-aging benefits, and enhance immune function.", "specs": [{"label": "400mg", "price": 48.0}, {"label": "600mg", "price": 70.0}, {"label": "1000mg", "price": 100.0}, {"label": "1500mg", "price": 132.0}], "clicks": 0}, {"id": "p89", "name": "SS-31 (Elamipretide)", "cat": "anti-aging-mitochondrial", "sub": "sub-61", "desc": "Mitochondria-protective peptide that may help improve cellular energy metabolism and endurance, while supporting anti-aging benefits, cardiovascular health, and muscle recovery.", "specs": [{"label": "10mg", "price": 97.0}, {"label": "50mg", "price": 420.0}], "clicks": 0}, {"id": "p90", "name": "Pinealon", "cat": "anti-aging-mitochondrial", "sub": "sub-62", "desc": "Anti-aging and neuroprotective peptide that may help improve neurological function, enhance memory, provide antioxidant support, and slow brain cell aging.", "specs": [{"label": "5mg", "price": 46.0}, {"label": "10mg", "price": 75.0}], "clicks": 0}, {"id": "p91", "name": "Cardiogen", "cat": "anti-aging-mitochondrial", "sub": "sub-62", "desc": "Cardioprotective peptides may improve cardiac function, promote myocardial repair, exert anti-inflammatory effects and boost cardiovascular health.", "specs": [{"label": "10mg", "price": 113.0}, {"label": "20mg", "price": 226.0}], "clicks": 0}, {"id": "p92", "name": "Crystagen", "cat": "anti-aging-mitochondrial", "sub": "sub-62", "desc": "Neuroprotective and anti-aging peptide that may help improve cognitive function, support neuroplasticity, promote cellular repair, and slow age-related decline.", "specs": [{"label": "10mg", "price": 102.0}, {"label": "20mg", "price": 188.0}], "clicks": 0}, {"id": "p93", "name": "Cortagen", "cat": "anti-aging-mitochondrial", "sub": "sub-62", "desc": "Bioregulator peptide studied for its potential to support connective tissue, skin, and tissue repair, with immunomodulatory effects.", "specs": [{"label": "10mg", "price": 113.0}], "clicks": 0}, {"id": "p94", "name": "GHK-CU", "cat": "beauty-skin-care", "sub": "sub-63", "desc": "Supports skin repair and anti-aging benefits, promotes wound healing, enhances collagen production, and may help improve skin health and hair regrowth.", "specs": [{"label": "50mg", "price": 38.0}, {"label": "100mg", "price": 48.0}], "clicks": 0}, {"id": "p95", "name": "AHK-CU", "cat": "beauty-skin-care", "sub": "sub-64", "desc": "Copper peptide studied for its potential to support scalp health, hair follicle growth, and skin and blood-vessel repair.", "specs": [{"label": "20mg", "price": 54.0}, {"label": "50mg", "price": 67.0}, {"label": "100mg", "price": 108.0}], "clicks": 0}, {"id": "p96", "name": "Snap-8", "cat": "beauty-skin-care", "sub": "sub-65", "desc": "Anti-aging skin peptide that may help reduce expression lines and fine wrinkles, with effects similar to botulinum toxin but milder in action. It may also support collagen production, helping improve skin firmness and smoothness.", "specs": [{"label": "10mg", "price": 81.0}, {"label": "100mg", "price": 479.0}], "clicks": 0}, {"id": "p97", "name": "Matrixyl", "cat": "beauty-skin-care", "sub": "sub-66", "desc": "Anti-aging cosmetic peptide that may help promote collagen production, reduce fine lines and wrinkles, and improve skin elasticity and firmness.", "specs": [{"label": "10mg", "price": 48.0}], "clicks": 0}, {"id": "p98", "name": "Melanotan I", "cat": "beauty-skin-care", "sub": "sub-67", "desc": "Alpha-MSH analog studied for its potential to stimulate melanin production and promote gradual skin pigmentation (tanning).", "specs": [{"label": "10mg", "price": 81.0}], "clicks": 0}, {"id": "p99", "name": "Melanotan II", "cat": "beauty-skin-care", "sub": "sub-67", "desc": "May promote skin pigmentation (tanning) and potentially enhance libido.", "specs": [{"label": "10mg", "price": 81.0}], "clicks": 0}, {"id": "p100", "name": "PTD-DBM", "cat": "beauty-skin-care", "sub": "sub-68", "desc": "Peptide studied for its potential to activate the Wnt/beta-catenin pathway, support hair follicle regeneration, and slow hair loss.", "specs": [{"label": "1mg", "price": 81.0}], "clicks": 0}, {"id": "p101", "name": "Botulinum Toxin", "cat": "beauty-skin-care", "sub": "sub-69", "desc": "Cosmetic injectable used to temporarily relax expression muscles and reduce the appearance of fine lines and wrinkles.", "specs": [{"label": "100iu", "price": 302.0}], "clicks": 0}];
+const DEFAULT_ANNOUNCEMENTS = [{id:1,date:'2026-09-10',title:'新品上架：Retatrutide 100mg',body:'Retatrutide 100mg 规格现已到货，欢迎订购。'},{id:2,date:'2026-09-05',title:'假期发货安排',body:'9月20日后订单可能略有延迟，请提前下单。'},{id:3,date:'2026-08-28',title:'COA验证系统上线',body:'可在网站COA标签页输入批号验证产品质量。'}];
+const DEFAULT_FORUM = [{id:1,title:'Tirzepatide vs Semaglutide 哪个减脂效果更好？',author:'MikeR',date:'2026-09-08',replies:24,views:1250,excerpt:'使用12周后的对比分享...',content:'Tirzepatide 抑制食欲更强，恶心较少。Semaglutide 低剂量更耐受但第8周左右平台期。仅供研究参考。'},{id:2,title:'BPC-157 恢复时间线分享',author:'SarahL',date:'2026-09-05',replies:18,views:890,excerpt:'肩袖损伤后的恢复方案...',content:'第1-3天微红，第4-7天疼痛减轻，第8-14天活动度改善，第15-21天基本恢复。配合TB-500使用。'},{id:3,title:'工厂参观报告',author:'Admin',date:'2026-09-01',replies:42,views:2100,excerpt:'GMP认证生产车间实拍...',content:'ISO 9001认证洁净车间，每批次HPLC纯度检测，冷冻干燥受控环境。所有产品纯度>99%。'},{id:4,title:'减脂期最佳搭配？HGH+CJC还是IGF？',author:'FitPro',date:'2026-08-28',replies:31,views:760,excerpt:'12周减脂期方案讨论...',content:'方案A：HGH+CJC-1295 vs 方案B：IGF-1 LR3+Ipamorelin。目标保肌减脂。'},{id:5,title:'澳大利亚清关经验',author:'OzUser',date:'2026-08-25',replies:15,views:620,excerpt:'第三单成功送达悉尼...',content:'澳洲运输7-10个工作日，包装专业 discreet，无问题。'}];
+const DEFAULT_REVIEWS = [{id:1,user:'James K.',country:'USA',rating:5,text:'Tirzepatide质量很好，发货快，会回购。'},{id:2,user:'Maria G.',country:'Mexico',rating:5,text:'BPC-157帮助膝盖恢复，客服响应快。'},{id:3,user:'Thomas L.',country:'Germany',rating:4,text:'HGH质量不错，柏林8天送达。'},{id:4,user:'Sophie M.',country:'France',rating:5,text:'Retatrutide效果超预期，6周减8kg。'},{id:5,user:'David W.',country:'UK',rating:5,text:'靠谱供应商，第三次下单，COA可查。'},{id:6,user:'Carlos R.',country:'Spain',rating:4,text:'Semaglutide效果好，整体满意。'},{id:7,user:'Anna P.',country:'Canada',rating:5,text:'谷胱甘肽质量一流。'}];
+const DEFAULT_COA = [{id:1,batch:'PL-2026-0901',product:'Tirzepatide 10mg',date:'2026-09-01',purity:'99.2%',note:'HPLC检测，符合USP标准'}];
+const DEFAULT_FACTORY = [{id:1,title:'GMP认证生产线',desc:'洁净车间自动化灌装',image:'https://aka.doubaocdn.com/s/crEdhuTAQ3'}];
+
+const Store = {get(k,f){try{const d=localStorage.getItem('pl_'+k);return d?JSON.parse(d):f}catch(e){return f}},set(k,v){localStorage.setItem('pl_'+k,JSON.stringify(v))}};
+const DATA_VERSION='v3-alias-search';
+if(localStorage.getItem('pl_data_version')!==DATA_VERSION){localStorage.setItem('pl_products',JSON.stringify(DEFAULT_PRODUCTS));localStorage.setItem('pl_categories',JSON.stringify(DEFAULT_CATEGORIES));localStorage.setItem('pl_data_version',DATA_VERSION);}
+let CATEGORIES = Store.get('categories', DEFAULT_CATEGORIES);
+let PRODUCTS = Store.get('products', DEFAULT_PRODUCTS);
+let ANNOUNCEMENTS = Store.get('announcements', DEFAULT_ANNOUNCEMENTS);
+let FORUM_POSTS = Store.get('forum', DEFAULT_FORUM);
+let REVIEWS = Store.get('reviews', DEFAULT_REVIEWS);
+let COA_RECORDS = Store.get('coa', DEFAULT_COA);
+let FACTORY_ITEMS = Store.get('factory', DEFAULT_FACTORY);
+
+function saveData(type){if(type==='products')Store.set('products',PRODUCTS);if(type==='categories')Store.set('categories',CATEGORIES);if(type==='announcements')Store.set('announcements',ANNOUNCEMENTS);if(type==='forum')Store.set('forum',FORUM_POSTS);if(type==='reviews')Store.set('reviews',REVIEWS);if(type==='coa')Store.set('coa',COA_RECORDS);if(type==='factory')Store.set('factory',FACTORY_ITEMS)}
+function nextId(arr){return arr.length?Math.max(...arr.map(x=>x.id||0))+1:1}
+
+// ===== Auth =====
+const ADMIN_PASSWORD = Store.get('admin_password', 'admin123');
+function doLogin(){const p=document.getElementById('adminPassword').value;if(p===ADMIN_PASSWORD){sessionStorage.setItem('pl_admin_logged','1');document.getElementById('loginScreen').style.display='none';document.getElementById('adminLayout').style.display='flex';switchTab('dashboard')}else{document.getElementById('loginError').style.display='block'}}
+function logout(){if(!confirm('确定要退出登录吗？'))return;sessionStorage.removeItem('pl_admin_logged');document.getElementById('adminLayout').style.display='none';document.getElementById('loginScreen').style.display='flex';document.getElementById('adminPassword').value='';document.getElementById('loginError').style.display='none'}
+if(sessionStorage.getItem('pl_admin_logged')==='1'){document.getElementById('loginScreen').style.display='none';document.getElementById('adminLayout').style.display='flex'}
+
+// ===== Tabs =====
+const TAB_TITLES = {dashboard:'数据概览',products:'产品管理',categories:'分类管理',announcements:'公告管理',coa:'COA管理',factory:'工厂内容',forum:'论坛管理',reviews:'评价管理',users:'用户管理',orders:'订单管理',externalOrders:'站外订单',settings:'系统设置'};
+let currentTab = 'dashboard';
+function switchTab(tab){currentTab=tab;document.querySelectorAll('.admin-nav-item').forEach(n=>n.classList.toggle('active',n.dataset.tab===tab));document.getElementById('pageTitle').textContent=TAB_TITLES[tab]||tab;renderContent()}
+
+// ===== Entity Config =====
+const ENTITY_CONFIG = {
+  products:{title:'产品',addLabel:'添加产品',fields:[
+    {key:'id',label:'产品ID',type:'text',required:true},
+    {key:'name',label:'产品名称',type:'text',required:true},
+    {key:'cat',label:'所属分类',type:'select',options:()=>CATEGORIES.map(c=>({value:c.id,label:c.name}))},
+    {key:'sub',label:'子分类ID',type:'text'},
+    {key:'desc',label:'产品描述',type:'textarea'},
+    {key:'specs',label:'规格列表（规格名+价格）',type:'specs'}
+  ],list:()=>PRODUCTS,columns:['id','name','cat','specs','clicks'],save:(item)=>{const idx=PRODUCTS.findIndex(p=>p.id===item.id);if(idx>=0)PRODUCTS[idx]=item;else PRODUCTS.push(item);saveData('products')}},
+  categories:{title:'分类',addLabel:'添加分类',fields:[
+    {key:'id',label:'分类ID',type:'text',required:true},
+    {key:'name',label:'分类名称',type:'text',required:true},
+    {key:'icon',label:'图标SVG路径',type:'text'}
+  ],list:()=>CATEGORIES,columns:['id','name','subs'],save:(item)=>{const idx=CATEGORIES.findIndex(c=>c.id===item.id);if(idx>=0)CATEGORIES[idx]=item;else CATEGORIES.push(item);saveData('categories')}},
+  announcements:{title:'公告',addLabel:'添加公告',fields:[
+    {key:'date',label:'日期',type:'date',required:true},
+    {key:'title',label:'标题',type:'text',required:true},
+    {key:'body',label:'内容',type:'textarea',required:true}
+  ],list:()=>ANNOUNCEMENTS,columns:['date','title','body'],save:(item)=>{const idx=ANNOUNCEMENTS.findIndex(a=>a.id===item.id);if(idx>=0)ANNOUNCEMENTS[idx]=item;else{item.id=nextId(ANNOUNCEMENTS);ANNOUNCEMENTS.push(item)}saveData('announcements')}},
+  coa:{title:'COA',addLabel:'添加COA',fields:[
+    {key:'batch',label:'批号',type:'text',required:true},
+    {key:'product',label:'产品',type:'text',required:true},
+    {key:'date',label:'检测日期',type:'date'},
+    {key:'purity',label:'纯度',type:'text'},
+    {key:'note',label:'备注',type:'textarea'}
+  ],list:()=>COA_RECORDS,columns:['batch','product','purity','date'],save:(item)=>{const idx=COA_RECORDS.findIndex(c=>c.id===item.id);if(idx>=0)COA_RECORDS[idx]=item;else{item.id=nextId(COA_RECORDS);COA_RECORDS.push(item)}saveData('coa')}},
+  factory:{title:'工厂内容',addLabel:'添加工厂内容',fields:[
+    {key:'type',label:'内容类型',type:'select',options:[{value:'image',label:'图片'},{value:'video',label:'视频'}]},
+    {key:'title',label:'标题',type:'text',required:true},
+    {key:'desc',label:'描述',type:'text'},
+    {key:'image',label:'封面图（可选，不上传则自动截取视频第一帧）',type:'text',upload:'image'},
+    {key:'video',label:'视频文件（仅视频类型填写，mp4等）',type:'text',upload:'video'},
+    {key:'date',label:'上传日期时间（如 2026-09-11 14:30）',type:'text'}
+  ],list:()=>FACTORY_ITEMS,columns:['type','title','date','desc'],save:(item)=>{const idx=FACTORY_ITEMS.findIndex(f=>f.id===item.id);if(idx>=0)FACTORY_ITEMS[idx]=item;else{item.id=nextId(FACTORY_ITEMS);FACTORY_ITEMS.push(item)}saveData('factory')}},
+  forum:{title:'论坛帖子',addLabel:'添加帖子',fields:[
+    {key:'title',label:'标题',type:'text',required:true},
+    {key:'author',label:'作者',type:'text',required:true},
+    {key:'date',label:'日期',type:'date'},
+    {key:'excerpt',label:'摘要',type:'text'},
+    {key:'content',label:'正文',type:'textarea',required:true},
+    {key:'replies',label:'回复数',type:'number'},
+    {key:'views',label:'浏览数',type:'number'}
+  ],list:()=>FORUM_POSTS,columns:['title','author','date','replies','views'],save:(item)=>{const idx=FORUM_POSTS.findIndex(p=>p.id===item.id);if(idx>=0)FORUM_POSTS[idx]=item;else{item.id=nextId(FORUM_POSTS);FORUM_POSTS.push(item)}saveData('forum')}},
+  reviews:{title:'评价',addLabel:'添加评价',fields:[
+    {key:'user',label:'用户名',type:'text',required:true},
+    {key:'country',label:'国家',type:'text'},
+    {key:'rating',label:'评分(1-5)',type:'number',required:true},
+    {key:'text',label:'评价内容',type:'textarea',required:true}
+  ],list:()=>REVIEWS,columns:['user','country','rating','text'],save:(item)=>{const idx=REVIEWS.findIndex(r=>r.id===item.id);if(idx>=0)REVIEWS[idx]=item;else{item.id=nextId(REVIEWS);REVIEWS.push(item)}saveData('reviews')}}
+};
+
+// ===== Render =====
+function renderContent(){
+  const el=document.getElementById('adminContent');
+  if(currentTab==='dashboard'){renderDashboard(el);return}
+  if(currentTab==='users'){renderUsers(el);return}
+  if(currentTab==='orders'){renderOrders(el);return}
+  if(currentTab==='externalOrders'){renderExternalOrders(el);return}
+  if(currentTab==='settings'){renderSettings(el);return}
+  const cfg=ENTITY_CONFIG[currentTab];
+  if(!cfg){el.innerHTML='<div class="admin-empty">请选择菜单</div>';return}
+  const items=cfg.list();
+  let extraBtn=(currentTab==='factory')?'<button class="btn btn-secondary" style="margin-right:8px" onclick="quickAddVideo()">+ 今日工厂视频</button>':'';
+  let html='<div class="panel"><div class="panel-toolbar"><span style="font-size:13px;color:var(--text-muted);">共 '+items.length+' 条记录</span><div>'+extraBtn+'<button class="btn btn-primary" onclick="openForm(\''+currentTab+'\',null)">+ '+cfg.addLabel+'</button></div></div>';
+  if(items.length===0){html+='<div class="admin-empty">暂无数据，点击上方按钮添加</div></div>';el.innerHTML=html;return}
+  html+='<table class="admin-table"><thead><tr>';
+  cfg.columns.forEach(col=>{html+='<th>'+col+'</th>'});
+  html+='<th>操作</th></tr></thead><tbody>';
+  items.forEach(item=>{
+    html+='<tr>';
+    cfg.columns.forEach(col=>{
+      let val=item[col];
+      if(col==='specs'&&Array.isArray(val))val=val.map(s=>s.label+'($'+s.price+')').join(', ');
+      if(col==='subs'&&Array.isArray(val))val=val.map(s=>s.name).join(', ');
+      if(col==='body'||col==='text'||col==='content'||col==='desc'||col==='excerpt'){val=String(val||'').substring(0,40)+(String(val||'').length>40?'...':'')}
+      if(col==='image')val='<img src="'+val+'" style="width:60px;height:36px;object-fit:cover;border-radius:4px;">';
+      if(col==='rating')val='★'.repeat(val||0)+'☆'.repeat(5-(val||0));
+      html+='<td>'+(val==null?'':val)+'</td>';
+    });
+    html+='<td><button class="btn btn-primary btn-sm" onclick="openForm(\''+currentTab+'\','+item.id+')">编辑</button> <button class="btn btn-danger btn-sm" onclick="deleteEntity(\''+currentTab+'\','+item.id+')">删除</button></td></tr>';
+  });
+  html+='</tbody></table></div>';
+  el.innerHTML=html;
+}
+
+function renderDashboard(el){
+  const orders=Store.get('orders',[]);
+  const totalRev=orders.reduce((s,o)=>s+o.total,0);
+  const totalSKUs=PRODUCTS.reduce((s,p)=>s+p.specs.length,0);
+  el.innerHTML='<div class="stats-grid">'+
+    '<div class="stat-card"><div class="stat-value">'+PRODUCTS.length+'</div><div class="stat-label">产品总数</div></div>'+
+    '<div class="stat-card"><div class="stat-value">'+totalSKUs+'</div><div class="stat-label">规格(SKU)总数</div></div>'+
+    '<div class="stat-card"><div class="stat-value">'+CATEGORIES.length+'</div><div class="stat-label">产品分类</div></div>'+
+    '<div class="stat-card"><div class="stat-value">'+orders.length+'</div><div class="stat-label">订单总数</div></div>'+
+    '<div class="stat-card"><div class="stat-value">$'+totalRev.toFixed(0)+'</div><div class="stat-label">订单总额</div></div>'+
+    '<div class="stat-card"><div class="stat-value">'+FORUM_POSTS.length+'</div><div class="stat-label">论坛帖子</div></div>'+
+    '<div class="stat-card"><div class="stat-value">'+REVIEWS.length+'</div><div class="stat-label">用户评价</div></div>'+
+    '<div class="stat-card"><div class="stat-value">'+ANNOUNCEMENTS.length+'</div><div class="stat-label">公告数量</div></div>'+
+    '</div><div class="panel"><h3 style="margin-bottom:12px;font-size:15px;">快捷操作</h3>'+
+    '<button class="btn btn-primary" style="margin-right:8px" onclick="switchTab(\'products\')">管理产品</button>'+
+    '<button class="btn btn-primary" style="margin-right:8px" onclick="switchTab(\'orders\')">查看订单</button>'+
+    '<button class="btn btn-primary" style="margin-right:8px" onclick="switchTab(\'announcements\')">发布公告</button>'+
+    '<button class="btn btn-secondary" onclick="location.href=\'index.html\'" target="_blank">打开前台网站</button>'+
+    '</div>';
+}
+
+function renderOrders(el){
+  const orders=JSON.parse(localStorage.getItem('pl_orders')||'[]');
+  const pending=orders.filter(o=>o.status==='pending');
+  const shipped=orders.filter(o=>o.status==='shipped');
+  const received=orders.filter(o=>o.status==='received');
+  
+  let html='<div style="margin-bottom:16px;display:flex;gap:12px;">'+
+    '<button class="btn btn-primary" onclick="showOrderSection(\'pending\')" id="btnPending">未发货 ('+pending.length+')</button>'+
+    '<button class="btn btn-secondary" onclick="showOrderSection(\'shipped\')" id="btnShipped">已发货 ('+shipped.length+')</button>'+
+    '<button class="btn btn-secondary" onclick="showOrderSection(\'received\')" id="btnReceived">已收货 ('+received.length+')</button>'+
+    '</div>';
+  
+  // Pending section
+  html+='<div id="sectionPending" class="panel"><div class="panel-toolbar"><span style="font-size:13px;color:var(--text-muted);">未发货订单 - 共 '+pending.length+' 个</span></div>';
+  if(pending.length===0){html+='<div class="admin-empty">暂无未发货订单</div></div>';}
+  else{
+    html+='<table class="admin-table"><thead><tr><th>订单号</th><th>下单时间</th><th>客户</th><th>邮箱</th><th>商品明细</th><th>总额</th><th>状态</th><th>操作</th></tr></thead><tbody>';
+    pending.forEach(o=>{
+      const itemsText=o.items.map(i=>i.productName+' ('+i.spec+') x'+i.qty).join(', ');
+      const date=new Date(o.orderDate).toLocaleString('zh-CN');
+      html+='<tr id="orderRow_'+o.id+'"><td><b>'+o.id+'</b></td><td>'+date+'</td><td>'+(o.username||'未知')+'</td><td>'+(o.email||'-')+'</td>'+
+      '<td><div>'+o.items.reduce((s,i)=>s+i.qty,0)+' 件</div><div style="font-size:11px;color:var(--text-light);margin-top:2px;">'+itemsText.substring(0,80)+'</div></td>'+
+      '<td><b>$'+o.total.toFixed(2)+'</b></td>'+
+      '<td><span style="color:#856404;background:#fff3cd;padding:3px 10px;border-radius:12px;font-size:12px;">未发货</span></td>'+
+      '<td>'+
+        '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">'+
+          '<input type="text" id="tracking_'+o.id+'" placeholder="输入运单号" style="padding:5px 8px;border:1px solid var(--border);border-radius:4px;font-size:12px;width:140px;">'+
+          '<button class="btn btn-primary btn-sm" onclick="confirmShip(\''+o.id+'\')">确认发货</button>'+
+          '<button class="btn btn-danger btn-sm" onclick="deleteOrder(\''+o.id+'\')">删除</button>'+
+        '</div>'+
+      '</td></tr>';
+    });
+    html+='</tbody></table></div>';
+  }
+  
+  // Shipped section
+  html+='<div id="sectionShipped" class="panel" style="display:none;"><div class="panel-toolbar"><span style="font-size:13px;color:var(--text-muted);">已发货订单 - 共 '+shipped.length+' 个</span></div>';
+  if(shipped.length===0){html+='<div class="admin-empty">暂无已发货订单</div></div>';}
+  else{
+    html+='<table class="admin-table"><thead><tr><th>订单号</th><th>下单时间</th><th>发货时间</th><th>客户</th><th>运单号</th><th>商品明细</th><th>总额</th><th>状态</th><th>操作</th></tr></thead><tbody>';
+    shipped.forEach(o=>{
+      const itemsText=o.items.map(i=>i.productName+' ('+i.spec+') x'+i.qty).join(', ');
+      const orderDate=new Date(o.orderDate).toLocaleString('zh-CN');
+      const shipDate=o.shipDate?new Date(o.shipDate).toLocaleString('zh-CN'):'-';
+      html+='<tr><td><b>'+o.id+'</b></td><td>'+orderDate+'</td><td>'+shipDate+'</td><td>'+(o.username||'未知')+'</td>'+
+      '<td><b style="color:var(--primary);">'+(o.trackingNumber||'-')+'</b></td>'+
+      '<td><div>'+o.items.reduce((s,i)=>s+i.qty,0)+' 件</div><div style="font-size:11px;color:var(--text-light);margin-top:2px;">'+itemsText.substring(0,60)+'</div></td>'+
+      '<td><b>$'+o.total.toFixed(2)+'</b></td>'+
+      '<td><span style="color:#155724;background:#d4edda;padding:3px 10px;border-radius:12px;font-size:12px;">已发货</span></td>'+
+      '<td>'+
+        '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">'+
+          '<button class="btn btn-success btn-sm" onclick="markReceived(\''+o.id+'\')" style="border:2px solid #155724;background:#d4edda;color:#155724;font-weight:700;">已收货</button>'+
+          '<button class="btn btn-secondary btn-sm" onclick="editTracking(\''+o.id+'\')">修改运单号</button>'+
+          '<button class="btn btn-danger btn-sm" onclick="deleteOrder(\''+o.id+'\')">删除</button>'+
+        '</div>'+
+        '<div id="editTrackForm_'+o.id+'" style="display:none;margin-top:6px;gap:6px;align-items:center;">'+
+          '<input type="text" id="editTrack_'+o.id+'" value="'+(o.trackingNumber || '')+'" style="padding:5px 8px;border:1px solid var(--border);border-radius:4px;font-size:12px;width:140px;">'+
+          '<button class="btn btn-primary btn-sm" onclick="saveTracking(\''+o.id+'\')">保存</button>'+
+          '<button class="btn btn-secondary btn-sm" onclick="cancelEditTracking(\''+o.id+'\')">取消</button>'+
+        '</div>'+
+      '</td></tr>';
+    });
+    html+='</tbody></table></div>';
+  }
+  
+  // Received section
+  html+='<div id="sectionReceived" class="panel" style="display:none;"><div class="panel-toolbar"><span style="font-size:13px;color:var(--text-muted);">已收货订单 - 共 '+received.length+' 个</span></div>';
+  if(received.length===0){html+='<div class="admin-empty">暂无已收货订单</div></div>';}
+  else{
+    html+='<table class="admin-table"><thead><tr><th>订单号</th><th>下单时间</th><th>发货时间</th><th>收货时间</th><th>客户</th><th>运单号</th><th>商品明细</th><th>总额</th><th>状态</th><th>操作</th></tr></thead><tbody>';
+    received.forEach(o=>{
+      const itemsText=o.items.map(i=>i.productName+' ('+i.spec+') x'+i.qty).join(', ');
+      const orderDate=new Date(o.orderDate).toLocaleString('zh-CN');
+      const shipDate=o.shipDate?new Date(o.shipDate).toLocaleString('zh-CN'):'-';
+      const receiveDate=o.receiveDate?new Date(o.receiveDate).toLocaleString('zh-CN'):'-';
+      html+='<tr><td><b>'+o.id+'</b></td><td>'+orderDate+'</td><td>'+shipDate+'</td><td>'+receiveDate+'</td><td>'+(o.username||'未知')+'</td>'+
+      '<td><b style="color:var(--primary);">'+(o.trackingNumber||'-')+'</b></td>'+
+      '<td><div>'+o.items.reduce((s,i)=>s+i.qty,0)+' 件</div><div style="font-size:11px;color:var(--text-light);margin-top:2px;">'+itemsText.substring(0,50)+'</div></td>'+
+      '<td><b>$'+o.total.toFixed(2)+'</b></td>'+
+      '<td><span style="color:#004085;background:#cce5ff;padding:3px 10px;border-radius:12px;font-size:12px;">已收货</span></td>'+
+      '<td><button class="btn btn-danger btn-sm" onclick="deleteOrder(\''+o.id+'\')">删除</button></td></tr>';
+    });
+    html+='</tbody></table></div>';
+  }
+  
+  el.innerHTML=html;
+}
+
+function showOrderSection(section){
+  document.getElementById('sectionPending').style.display=section==='pending'?'block':'none';
+  document.getElementById('sectionShipped').style.display=section==='shipped'?'block':'none';
+  document.getElementById('sectionReceived').style.display=section==='received'?'block':'none';
+  document.getElementById('btnPending').className=section==='pending'?'btn btn-primary':'btn btn-secondary';
+  document.getElementById('btnShipped').className=section==='shipped'?'btn btn-primary':'btn btn-secondary';
+  document.getElementById('btnReceived').className=section==='received'?'btn btn-primary':'btn btn-secondary';
+}
+
+function showShipForm(oid){
+  document.getElementById('shipForm_'+oid).style.display='flex';
+  document.getElementById('shipBtn_'+oid).style.display='none';
+  document.getElementById('tracking_'+oid).focus();
+}
+
+function confirmShip(oid){
+  const tracking=document.getElementById('tracking_'+oid).value.trim();
+  if(!tracking){showToast('请输入运单号');return;}
+  const orders=JSON.parse(localStorage.getItem('pl_orders')||'[]');
+  const o=orders.find(x=>x.id===oid);
+  if(o){
+    o.status='shipped';
+    o.trackingNumber=tracking;
+    o.shipDate=new Date().toISOString();
+    localStorage.setItem('pl_orders',JSON.stringify(orders));
+    showToast('订单 '+oid+' 已发货，运单号：'+tracking);
+    renderContent();
+  }
+}
+
+function deleteOrder(oid){
+  if(!confirm('确定删除订单 '+oid+'？'))return;
+  let orders=JSON.parse(localStorage.getItem('pl_orders')||'[]');
+  orders=orders.filter(o=>o.id!==oid);
+  localStorage.setItem('pl_orders',JSON.stringify(orders));
+  showToast('订单已删除');
+  renderContent();
+}
+
+function markReceived(oid){
+  if(!confirm('确认订单 '+oid+' 客户已收货？'))return;
+  const orders=JSON.parse(localStorage.getItem('pl_orders')||'[]');
+  const o=orders.find(x=>x.id===oid);
+  if(o){
+    o.status='received';
+    o.receiveDate=new Date().toISOString();
+    localStorage.setItem('pl_orders',JSON.stringify(orders));
+    showToast('订单 '+oid+' 已标记为已收货');
+    renderContent();
+  }
+}
+
+function editTracking(oid){
+  document.getElementById('editTrackForm_'+oid).style.display='flex';
+  document.getElementById('editTrack_'+oid).focus();
+}
+
+function cancelEditTracking(oid){
+  document.getElementById('editTrackForm_'+oid).style.display='none';
+}
+
+function saveTracking(oid){
+  const newTrack=document.getElementById('editTrack_'+oid).value.trim();
+  if(!newTrack){showToast('运单号不能为空');return;}
+  const orders=JSON.parse(localStorage.getItem('pl_orders')||'[]');
+  const o=orders.find(x=>x.id===oid);
+  if(o){
+    o.trackingNumber=newTrack;
+    localStorage.setItem('pl_orders',JSON.stringify(orders));
+    showToast('运单号已修改为：'+newTrack+'（已同步前端）');
+    renderContent();
+  }
+}
+
+
+function renderExternalOrders(el){
+  const orders=JSON.parse(localStorage.getItem('pl_external_orders')||'[]');
+  const pending=orders.filter(o=>o.status==='pending');
+  const shipped=orders.filter(o=>o.status==='shipped');
+  const received=orders.filter(o=>o.status==='received');
+  
+  let html='<div style="margin-bottom:16px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;">'+
+    '<button class="btn btn-success" onclick="showExtNewForm()" style="border:2px solid #28a745;background:#fff;color:#28a745;font-weight:600;">+ 新增站外订单</button>'+
+    '<button class="btn btn-primary" onclick="showExtSection(\'pending\')" id="btnExtPending">未发货 ('+pending.length+')</button>'+
+    '<button class="btn btn-secondary" onclick="showExtSection(\'shipped\')" id="btnExtShipped">已发货 ('+shipped.length+')</button>'+
+    '<button class="btn btn-secondary" onclick="showExtSection(\'received\')" id="btnExtReceived">已收货 ('+received.length+')</button>'+
+    '</div>';
+  
+  // New order form
+  html+='<div id="extNewForm" class="panel" style="display:none;margin-bottom:16px;">'+
+    '<div class="panel-toolbar"><h3 style="font-size:15px;margin:0;">新增站外订单</h3></div>'+
+    '<div style="padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;">'+
+      '<div style="position:relative;">'+
+        '<label style="font-size:12px;color:var(--text-light);display:block;margin-bottom:4px;">绑定站内用户（可选）</label>'+
+        '<input type="text" id="extBindUser" placeholder="输入用户名或邮箱搜索" oninput="searchUserSuggest(this.value)" onblur="setTimeout(hideUserSuggest,200)" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:4px;font-size:13px;">'+
+        '<div id="userSuggest" class="user-suggest-dropdown" style="display:none;"></div>'+
+        '<input type="hidden" id="extBindUserId">'+
+      '</div>'+
+      '<div><label style="font-size:12px;color:var(--text-light);display:block;margin-bottom:4px;">订单号</label>'+
+        '<input type="text" id="extOrderNo" placeholder="输入订单号" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:4px;font-size:13px;"></div>'+
+      '<div><label style="font-size:12px;color:var(--text-light);display:block;margin-bottom:4px;">客户邮箱</label>'+
+        '<input type="text" id="extEmail" placeholder="输入客户邮箱" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:4px;font-size:13px;"></div>'+
+      '<div><label style="font-size:12px;color:var(--text-light);display:block;margin-bottom:4px;">运单号</label>'+
+        '<input type="text" id="extTracking" placeholder="输入运单号" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:4px;font-size:13px;"></div>'+
+    '</div>'+
+    '<div style="padding:0 16px 16px;display:flex;gap:8px;align-items:center;">'+
+      '<button class="btn btn-primary" onclick="submitExtOrder()">确认发货</button>'+
+      '<button class="btn btn-secondary" onclick="hideExtNewForm()">取消</button>'+
+      '<span id="extConfirmHint" style="color:#dc3545;font-size:12px;display:none;">请确认订单号或邮箱已填写，运单号：<span id="extConfirmTrack"></span> <button class="btn btn-success btn-sm" onclick="confirmExtOrder()" style="margin-left:8px;border:2px solid #155724;background:#d4edda;color:#155724;font-weight:700;">确认绑定发货</button></span>'+
+    '</div>'+
+  '</div>';
+  
+  // Pending section
+  html+='<div id="extSectionPending" class="panel"><div class="panel-toolbar"><span style="font-size:13px;color:var(--text-muted);">未发货站外订单 - 共 '+pending.length+' 个</span></div>';
+  if(pending.length===0){html+='<div class="admin-empty">暂无未发货站外订单</div></div>';}
+  else{
+    html+='<table class="admin-table"><thead><tr><th>订单号</th><th>绑定用户</th><th>邮箱</th><th>运单号</th><th>创建时间</th><th>状态</th><th>操作</th></tr></thead><tbody>';
+    pending.forEach(o=>{
+      const date=new Date(o.createDate).toLocaleString('zh-CN');
+      html+='<tr><td><b>'+(o.orderNumber||'-')+'</b></td><td>'+(o.username||'未绑定')+'</td><td>'+(o.email||'-')+'</td>'+
+      '<td>'+(o.trackingNumber||'-')+'</td><td>'+date+'</td>'+
+      '<td><span style="color:#856404;background:#fff3cd;padding:3px 10px;border-radius:12px;font-size:12px;">未发货</span></td>'+
+      '<td>'+
+        '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">'+
+          '<button class="btn btn-success btn-sm" onclick="markExtReceived(\''+o.id+'\')" style="border:2px solid #155724;background:#d4edda;color:#155724;font-weight:700;">已收货</button>'+
+          '<button class="btn btn-secondary btn-sm" onclick="editExtTracking(\''+o.id+'\')">修改运单号</button>'+
+          '<button class="btn btn-danger btn-sm" onclick="deleteExtOrder(\''+o.id+'\')">删除</button>'+
+        '</div>'+
+        '<div id="editExtTrackForm_'+o.id+'" style="display:none;margin-top:6px;gap:6px;align-items:center;">'+
+          '<input type="text" id="editExtTrack_'+o.id+'" value="'+(o.trackingNumber || '')+'" style="padding:5px 8px;border:1px solid var(--border);border-radius:4px;font-size:12px;width:140px;">'+
+          '<button class="btn btn-primary btn-sm" onclick="saveExtTracking(\''+o.id+'\')">保存</button>'+
+          '<button class="btn btn-secondary btn-sm" onclick="cancelEditExtTracking(\''+o.id+'\')">取消</button>'+
+        '</div>'+
+      '</td></tr>';
+    });
+    html+='</tbody></table></div>';
+  }
+  
+  // Shipped section
+  html+='<div id="extSectionShipped" class="panel" style="display:none;"><div class="panel-toolbar"><span style="font-size:13px;color:var(--text-muted);">已发货站外订单 - 共 '+shipped.length+' 个</span></div>';
+  if(shipped.length===0){html+='<div class="admin-empty">暂无已发货站外订单</div></div>';}
+  else{
+    html+='<table class="admin-table"><thead><tr><th>订单号</th><th>绑定用户</th><th>邮箱</th><th>运单号</th><th>发货时间</th><th>状态</th><th>操作</th></tr></thead><tbody>';
+    shipped.forEach(o=>{
+      const shipDate=o.shipDate?new Date(o.shipDate).toLocaleString('zh-CN'):'-';
+      html+='<tr><td><b>'+(o.orderNumber||'-')+'</b></td><td>'+(o.username||'未绑定')+'</td><td>'+(o.email||'-')+'</td>'+
+      '<td><b style="color:var(--primary);">'+(o.trackingNumber||'-')+'</b></td><td>'+shipDate+'</td>'+
+      '<td><span style="color:#155724;background:#d4edda;padding:3px 10px;border-radius:12px;font-size:12px;">已发货</span></td>'+
+      '<td>'+
+        '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">'+
+          '<button class="btn btn-success btn-sm" onclick="markExtReceived(\''+o.id+'\')" style="border:2px solid #155724;background:#d4edda;color:#155724;font-weight:700;">已收货</button>'+
+          '<button class="btn btn-secondary btn-sm" onclick="editExtTracking(\''+o.id+'\')">修改运单号</button>'+
+          '<button class="btn btn-danger btn-sm" onclick="deleteExtOrder(\''+o.id+'\')">删除</button>'+
+        '</div>'+
+        '<div id="editExtTrackForm_'+o.id+'" style="display:none;margin-top:6px;gap:6px;align-items:center;">'+
+          '<input type="text" id="editExtTrack_'+o.id+'" value="'+(o.trackingNumber || '')+'" style="padding:5px 8px;border:1px solid var(--border);border-radius:4px;font-size:12px;width:140px;">'+
+          '<button class="btn btn-primary btn-sm" onclick="saveExtTracking(\''+o.id+'\')">保存</button>'+
+          '<button class="btn btn-secondary btn-sm" onclick="cancelEditExtTracking(\''+o.id+'\')">取消</button>'+
+        '</div>'+
+      '</td></tr>';
+    });
+    html+='</tbody></table></div>';
+  }
+  
+  // Received section
+  html+='<div id="extSectionReceived" class="panel" style="display:none;"><div class="panel-toolbar"><span style="font-size:13px;color:var(--text-muted);">已收货站外订单 - 共 '+received.length+' 个</span></div>';
+  if(received.length===0){html+='<div class="admin-empty">暂无已收货站外订单</div></div>';}
+  else{
+    html+='<table class="admin-table"><thead><tr><th>订单号</th><th>绑定用户</th><th>邮箱</th><th>运单号</th><th>发货时间</th><th>收货时间</th><th>状态</th><th>操作</th></tr></thead><tbody>';
+    received.forEach(o=>{
+      const shipDate=o.shipDate?new Date(o.shipDate).toLocaleString('zh-CN'):'-';
+      const receiveDate=o.receiveDate?new Date(o.receiveDate).toLocaleString('zh-CN'):'-';
+      html+='<tr><td><b>'+(o.orderNumber||'-')+'</b></td><td>'+(o.username||'未绑定')+'</td><td>'+(o.email||'-')+'</td>'+
+      '<td><b style="color:var(--primary);">'+(o.trackingNumber||'-')+'</b></td><td>'+shipDate+'</td><td>'+receiveDate+'</td>'+
+      '<td><span style="color:#004085;background:#cce5ff;padding:3px 10px;border-radius:12px;font-size:12px;">已收货</span></td>'+
+      '<td><button class="btn btn-danger btn-sm" onclick="deleteExtOrder(\''+o.id+'\')">删除</button></td></tr>';
+    });
+    html+='</tbody></table></div>';
+  }
+  
+  el.innerHTML=html;
+}
+
+function showExtNewForm(){
+  document.getElementById('extNewForm').style.display='block';
+  document.getElementById('extBindUser').value='';
+  document.getElementById('extBindUserId').value='';
+  document.getElementById('extOrderNo').value='';
+  document.getElementById('extEmail').value='';
+  document.getElementById('extTracking').value='';
+  document.getElementById('extConfirmHint').style.display='none';
+}
+
+function hideExtNewForm(){
+  document.getElementById('extNewForm').style.display='none';
+}
+
+function showExtSection(section){
+  document.getElementById('extSectionPending').style.display=section==='pending'?'block':'none';
+  document.getElementById('extSectionShipped').style.display=section==='shipped'?'block':'none';
+  document.getElementById('extSectionReceived').style.display=section==='received'?'block':'none';
+  document.getElementById('btnExtPending').className=section==='pending'?'btn btn-primary':'btn btn-secondary';
+  document.getElementById('btnExtShipped').className=section==='shipped'?'btn btn-primary':'btn btn-secondary';
+  document.getElementById('btnExtReceived').className=section==='received'?'btn btn-primary':'btn btn-secondary';
+}
+
+function searchUserSuggest(val){
+  const dropdown=document.getElementById('userSuggest');
+  if(!val||val.length<1){dropdown.style.display='none';return;}
+  const users=JSON.parse(localStorage.getItem('pl_users')||'[]');
+  const q=val.toLowerCase();
+  const matches=users.filter(u=>u.username.toLowerCase().includes(q)||(u.email&&u.email.toLowerCase().includes(q))).slice(0,8);
+  if(matches.length===0){dropdown.style.display='none';return;}
+  let html='';
+  matches.forEach(u=>{
+    html+='<div class="user-suggest-item" onmousedown="selectUserSuggest(\''+u.id+'\',\''+u.username.replace(/'/g,"\\'")+'\')">'+
+      '<div class="uname">'+u.username+'</div>'+
+      '<div class="uemail">'+(u.email||'')+'</div></div>';
+  });
+  dropdown.innerHTML=html;
+  dropdown.style.display='block';
+}
+
+function selectUserSuggest(uid,uname){
+  document.getElementById('extBindUser').value=uname;
+  document.getElementById('extBindUserId').value=uid;
+  document.getElementById('userSuggest').style.display='none';
+  // Auto-fill customer email from bound user
+  const users=JSON.parse(localStorage.getItem('pl_users')||'[]');
+  const u=users.find(x=>x.id===uid);
+  if(u&&u.email){
+    document.getElementById('extEmail').value=u.email;
+  }
+}
+
+function hideUserSuggest(){
+  document.getElementById('userSuggest').style.display='none';
+}
+
+function submitExtOrder(){
+  const orderNo=document.getElementById('extOrderNo').value.trim();
+  const email=document.getElementById('extEmail').value.trim();
+  const tracking=document.getElementById('extTracking').value.trim();
+  
+  if(!orderNo && !email){
+    showToast('运单号未绑定，请重新确认');
+    return;
+  }
+  if(!tracking){
+    showToast('请输入运单号');
+    return;
+  }
+  
+  // Show confirmation
+  document.getElementById('extConfirmTrack').textContent=tracking;
+  document.getElementById('extConfirmHint').style.display='inline';
+}
+
+function confirmExtOrder(){
+  const orderNo=document.getElementById('extOrderNo').value.trim();
+  const email=document.getElementById('extEmail').value.trim();
+  const tracking=document.getElementById('extTracking').value.trim();
+  const bindUid=document.getElementById('extBindUserId').value;
+  const bindUname=document.getElementById('extBindUser').value.trim();
+  
+  const orders=JSON.parse(localStorage.getItem('pl_external_orders')||'[]');
+  const newOrder={
+    id:'ext_'+Date.now(),
+    userId:bindUid||'',
+    username:bindUname||'',
+    orderNumber:orderNo,
+    email:email,
+    trackingNumber:tracking,
+    status:'shipped',
+    createDate:new Date().toISOString(),
+    shipDate:new Date().toISOString()
+  };
+  orders.push(newOrder);
+  localStorage.setItem('pl_external_orders',JSON.stringify(orders));
+  
+  showToast('站外订单已创建并发货，运单号：'+tracking);
+  renderContent();
+}
+
+function markExtReceived(oid){
+  if(!confirm('确认该站外订单客户已收货？'))return;
+  const orders=JSON.parse(localStorage.getItem('pl_external_orders')||'[]');
+  const o=orders.find(x=>x.id===oid);
+  if(o){
+    o.status='received';
+    o.receiveDate=new Date().toISOString();
+    localStorage.setItem('pl_external_orders',JSON.stringify(orders));
+    showToast('站外订单已标记为已收货');
+    renderContent();
+  }
+}
+
+function editExtTracking(oid){
+  document.getElementById('editExtTrackForm_'+oid).style.display='flex';
+  document.getElementById('editExtTrack_'+oid).focus();
+}
+
+function cancelEditExtTracking(oid){
+  document.getElementById('editExtTrackForm_'+oid).style.display='none';
+}
+
+function saveExtTracking(oid){
+  const newTrack=document.getElementById('editExtTrack_'+oid).value.trim();
+  if(!newTrack){showToast('运单号不能为空');return;}
+  const orders=JSON.parse(localStorage.getItem('pl_external_orders')||'[]');
+  const o=orders.find(x=>x.id===oid);
+  if(o){
+    o.trackingNumber=newTrack;
+    localStorage.setItem('pl_external_orders',JSON.stringify(orders));
+    showToast('运单号已修改为：'+newTrack+'（已同步前端）');
+    renderContent();
+  }
+}
+
+function deleteExtOrder(oid){
+  if(!confirm('确定删除该站外订单？'))return;
+  let orders=JSON.parse(localStorage.getItem('pl_external_orders')||'[]');
+  orders=orders.filter(o=>o.id!==oid);
+  localStorage.setItem('pl_external_orders',JSON.stringify(orders));
+  showToast('站外订单已删除');
+  renderContent();
+}
+
+function renderSettings(el){
+  el.innerHTML='<div class="panel"><h3 style="margin-bottom:16px;font-size:15px;">系统设置</h3>'+
+    '<div class="form-group"><label>修改管理员密码</label><input type="password" id="newPwd" placeholder="输入新密码"></div>'+
+    '<button class="btn btn-primary" onclick="changePwd()">保存密码</button>'+
+    '<hr style="margin:24px 0;border:none;border-top:1px solid var(--border)">'+
+    '<h3 style="margin-bottom:12px;font-size:15px;">数据管理</h3>'+
+    '<button class="btn btn-secondary" style="margin-right:8px" onclick="exportData()">导出所有数据(JSON)</button>'+
+    '<button class="btn btn-danger" onclick="resetData()">重置为默认数据</button>'+
+    '<p style="margin-top:12px;font-size:12px;color:var(--text-light);">注意：重置将清除所有自定义修改，恢复为初始数据。</p></div>';
+}
+function changePwd(){const p=document.getElementById('newPwd').value;if(!p){showToast('请输入新密码');return}Store.set('admin_password',p);showToast('密码已修改，请重新登录');logout()}
+function exportData(){const data={products:PRODUCTS,categories:CATEGORIES,announcements:ANNOUNCEMENTS,forum:FORUM_POSTS,reviews:REVIEWS,coa:COA_RECORDS,factory:FACTORY_ITEMS,orders:Store.get('orders',[])};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='peptidelab_backup_'+new Date().toISOString().split('T')[0]+'.json';a.click();URL.revokeObjectURL(url);showToast('数据已导出')}
+function resetData(){if(!confirm('确定重置所有数据为默认值？此操作不可撤销！'))return;localStorage.removeItem('pl_products');localStorage.removeItem('pl_categories');localStorage.removeItem('pl_announcements');localStorage.removeItem('pl_forum');localStorage.removeItem('pl_reviews');localStorage.removeItem('pl_coa');localStorage.removeItem('pl_factory');localStorage.removeItem('pl_orders');localStorage.removeItem('pl_clicks');localStorage.removeItem('pl_cart');PRODUCTS=DEFAULT_PRODUCTS;CATEGORIES=DEFAULT_CATEGORIES;ANNOUNCEMENTS=DEFAULT_ANNOUNCEMENTS;FORUM_POSTS=DEFAULT_FORUM;REVIEWS=DEFAULT_REVIEWS;COA_RECORDS=DEFAULT_COA;FACTORY_ITEMS=DEFAULT_FACTORY;showToast('数据已重置');renderContent()}
+
+// ===== Form (Add/Edit) =====
+let editingEntity=null;
+function handleFileUpload(inputId,acceptType){
+  const input=document.createElement('input');
+  input.type='file';
+  input.accept=acceptType;
+  input.onchange=function(e){
+    const file=e.target.files[0];
+    if(!file)return;
+    const sizeMB=(file.size/1024/1024).toFixed(2);
+    if(file.size>8*1024*1024){
+      alert('文件过大（'+sizeMB+'MB），浏览器本地存储限制约5-8MB。\n建议：大视频请先上传到视频托管平台，然后粘贴视频链接URL。');
+      return;
+    }
+    const reader=new FileReader();
+    reader.onload=function(ev){
+      const dataUrl=ev.target.result;
+      const target=document.getElementById(inputId);
+      if(target){target.value=dataUrl;target.dispatchEvent(new Event('input'));}
+      const hint=document.getElementById(inputId+'_hint');
+      if(hint)hint.textContent='已上传: '+file.name+' ('+sizeMB+'MB)';
+      const preview=document.getElementById(inputId+'_preview');
+      if(preview&&acceptType.startsWith('image')){preview.src=dataUrl;preview.style.display='block';}
+      // 视频上传后自动截取第一帧作为封面
+      if(acceptType==='video/*'||acceptType.startsWith('video')){
+        const imgField=document.getElementById('field_image');
+        if(imgField&&!imgField.value.trim()){
+          if(hint)hint.textContent+='，正在截取封面...';
+          const video=document.createElement('video');
+          video.crossOrigin='anonymous';
+          video.muted=true;
+          video.playsInline=true;
+          video.onloadeddata=function(){
+            try{
+              video.currentTime=Math.min(0.2,video.duration*0.1||0.1);
+            }catch(err){}
+          };
+          video.onseeked=function(){
+            try{
+              const canvas=document.createElement('canvas');
+              const w=video.videoWidth||640,h=video.videoHeight||360;
+              canvas.width=w;canvas.height=h;
+              const ctx=canvas.getContext('2d');
+              ctx.drawImage(video,0,0,w,h);
+              const frameUrl=canvas.toDataURL('image/jpeg',0.8);
+              imgField.value=frameUrl;
+              const imgPreview=document.getElementById('field_image_preview');
+              if(imgPreview){imgPreview.src=frameUrl;imgPreview.style.display='block';}
+              const imgHint=document.getElementById('field_image_hint');
+              if(imgHint)imgHint.textContent='已自动截取视频第一帧作为封面';
+              if(hint)hint.textContent='已上传: '+file.name+' ('+sizeMB+'MB)，封面已自动截取';
+            }catch(err){
+              if(hint)hint.textContent='已上传: '+file.name+' ('+sizeMB+'MB)，封面截取失败请手动上传';
+            }
+          };
+          video.onerror=function(){
+            if(hint)hint.textContent='已上传: '+file.name+' ('+sizeMB+'MB)，封面截取失败请手动上传';
+          };
+          video.src=dataUrl;
+          video.load();
+        }
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+
+function quickAddVideo(){
+  const now=new Date();
+  const pad=n=>String(n).padStart(2,'0');
+  const dateStr=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+' '+pad(now.getHours())+':'+pad(now.getMinutes());
+  editingEntity={type:'factory',id:null,prefill:{type:'video',date:dateStr,title:dateStr+' 工厂生产实拍'}};
+  const cfg=ENTITY_CONFIG['factory'];
+  document.getElementById('entityModalTitle').textContent='添加今日工厂视频';
+  let html='<form id="entityForm" onsubmit="saveEntity(event)">';
+  cfg.fields.forEach(f=>{
+    const val=(editingEntity.prefill&&editingEntity.prefill[f.key]!=null)?editingEntity.prefill[f.key]:'';
+    html+='<div class="form-group"><label>'+f.label+(f.required?' *':'')+'</label>';
+    if(f.type==='textarea'){html+='<textarea name="'+f.key+'" '+(f.required?'required':'')+'>'+val+'</textarea>'}
+    else if(f.type==='select'){const opts=typeof f.options==='function'?f.options():f.options;html+='<select name="'+f.key+'">'+opts.map(o=>'<option value="'+o.value+'"'+(String(val)===String(o.value)?' selected':'')+'>'+o.label+'</option>').join('')+'</select>'}
+    else if(f.upload){
+      const accept=f.upload==='image'?'image/*':'video/*';
+      const btnText=f.upload==='image'?'上传图片':'上传视频';
+      html+='<div class="upload-row"><input type="text" id="field_'+f.key+'" name="'+f.key+'" value="'+String(val).replace(/"/g,'&quot;')+'" placeholder="粘贴URL 或 点击右侧上传本地文件" '+(f.required?'required':'')+'><button type="button" class="upload-btn" onclick="handleFileUpload(\'field_'+f.key+'\',\''+accept+'\')">'+btnText+'</button></div>';
+      html+='<div class="upload-hint" id="field_'+f.key+'_hint">支持本地上传（≤8MB）或粘贴网络URL</div>';
+      if(f.upload==='image')html+='<img class="upload-preview" id="field_'+f.key+'_preview" alt="preview">';
+    }
+    else{html+='<input type="'+f.type+'" name="'+f.key+'" value="'+String(val).replace(/"/g,'&quot;')+'" '+(f.required?'required':'')+'>'}
+    html+='</div>';
+  });
+  html+='<div class="form-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">取消</button><button type="submit" class="btn btn-primary">保存</button></div></form>';
+  document.getElementById('entityModalBody').innerHTML=html;
+  document.getElementById('entityModal').classList.add('open');
+}
+function openForm(type,id){
+  const cfg=ENTITY_CONFIG[type];if(!cfg)return;
+  editingEntity={type,id};
+  const item=id!=null?cfg.list().find(x=>String(x.id)===String(id)):null;
+  document.getElementById('entityModalTitle').textContent=item?'编辑'+cfg.title:'添加'+cfg.title;
+  let html='<form id="entityForm" onsubmit="saveEntity(event)">';
+  cfg.fields.forEach(f=>{
+    const val=item?(item[f.key]!=null?item[f.key]:''):'';
+    html+='<div class="form-group"><label>'+f.label+(f.required?' *':'')+'</label>';
+    if(f.type==='textarea'){html+='<textarea name="'+f.key+'" '+(f.required?'required':'')+'>'+val+'</textarea>'}
+    else if(f.type==='select'){const opts=typeof f.options==='function'?f.options():f.options;html+='<select name="'+f.key+'">'+opts.map(o=>'<option value="'+o.value+'"'+(String(val)===String(o.value)?' selected':'')+'>'+o.label+'</option>').join('')+'</select>'}
+    else if(f.type==='specs'){
+      html+='<div class="spec-editor" id="specEditor">';
+      const specs=Array.isArray(val)&&val.length?val:[{label:'',price:0}];
+      specs.forEach(s=>{html+=renderSpecRow(s.label,s.price)});
+      html+='</div><button type="button" class="spec-add" onclick="addSpecRow()">+ 添加规格</button>';
+    }
+    else if(f.upload){
+      const accept=f.upload==='image'?'image/*':'video/*';
+      const btnText=f.upload==='image'?'上传图片':'上传视频';
+      html+='<div class="upload-row"><input type="text" id="field_'+f.key+'" name="'+f.key+'" value="'+String(val).replace(/"/g,'&quot;')+'" placeholder="粘贴URL 或 点击右侧上传本地文件" '+(f.required?'required':'')+'><button type="button" class="upload-btn" onclick="handleFileUpload(\'field_'+f.key+'\',\''+accept+'\')">'+btnText+'</button></div>';
+      html+='<div class="upload-hint" id="field_'+f.key+'_hint">支持本地上传（≤8MB）或粘贴网络URL</div>';
+      if(f.upload==='image')html+='<img class="upload-preview" id="field_'+f.key+'_preview" alt="preview">';
+    }
+    else{html+='<input type="'+f.type+'" name="'+f.key+'" value="'+String(val).replace(/"/g,'&quot;')+'" '+(f.required?'required':'')+'>'}
+    html+='</div>';
+  });
+  html+='<div class="form-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">取消</button><button type="submit" class="btn btn-primary">保存</button></div></form>';
+  document.getElementById('entityModalBody').innerHTML=html;
+  document.getElementById('entityModal').classList.add('open');
+}
+function renderSpecRow(label,price){return'<div class="spec-row-editor"><input type="text" placeholder="规格名(如 5mg vial)" value="'+(label||'')+'" class="spec-label-input"><input type="number" step="0.01" placeholder="价格" value="'+(price||0)+'" class="spec-price-input"><button type="button" class="spec-remove" onclick="this.parentElement.remove()">x</button></div>'}
+function addSpecRow(){document.getElementById('specEditor').insertAdjacentHTML('beforeend',renderSpecRow('',0))}
+function saveEntity(e){
+  e.preventDefault();
+  const {type,id}=editingEntity;
+  const cfg=ENTITY_CONFIG[type];
+  const form=document.getElementById('entityForm');
+  const item={};
+  cfg.fields.forEach(f=>{
+    if(f.type==='specs'){
+      const labels=form.querySelectorAll('.spec-label-input');
+      const prices=form.querySelectorAll('.spec-price-input');
+      item.specs=[];
+      labels.forEach((lab,i)=>{if(lab.value.trim())item.specs.push({label:lab.value.trim(),price:parseFloat(prices[i].value)||0})});
+    }else{
+      const el=form.querySelector('[name="'+f.key+'"]');
+      if(el){let v=el.value;if(f.type==='number')v=parseFloat(v)||0;item[f.key]=v}
+    }
+  });
+  if(id!=null){const existing=cfg.list().find(x=>String(x.id)===String(id));if(existing)item.id=existing.id}
+  if(type==='products'||type==='categories'){if(!item.id)item.id='item_'+Date.now()}
+  if(type==='products'&&!item.clicks)item.clicks=0;
+  cfg.save(item);
+  closeModal();
+  showToast(cfg.title+'已保存');
+  renderContent();
+}
+function deleteEntity(type,id){
+  const cfg=ENTITY_CONFIG[type];
+  const item=cfg.list().find(x=>String(x.id)===String(id));
+  if(!item)return;
+  const name=item.name||item.title||item.batch||item.user||'该记录';
+  if(!confirm('确定删除 "'+name+'"？此操作不可撤销！'))return;
+  if(type==='products'){PRODUCTS=PRODUCTS.filter(p=>String(p.id)!==String(id));saveData('products')}
+  else if(type==='categories'){CATEGORIES=CATEGORIES.filter(c=>String(c.id)!==String(id));saveData('categories')}
+  else if(type==='announcements'){ANNOUNCEMENTS=ANNOUNCEMENTS.filter(a=>a.id!==id);saveData('announcements')}
+  else if(type==='coa'){COA_RECORDS=COA_RECORDS.filter(c=>c.id!==id);saveData('coa')}
+  else if(type==='factory'){FACTORY_ITEMS=FACTORY_ITEMS.filter(f=>f.id!==id);saveData('factory')}
+  else if(type==='forum'){FORUM_POSTS=FORUM_POSTS.filter(p=>p.id!==id);saveData('forum')}
+  else if(type==='reviews'){REVIEWS=REVIEWS.filter(r=>r.id!==id);saveData('reviews')}
+  showToast('已删除: '+name);
+  renderContent();
+}
+function closeModal(){document.getElementById('entityModal').classList.remove('open')}
+
+// ===== Toast =====
+let toastTimer;
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2500)}
+
+// Init
+if(sessionStorage.getItem('pl_admin_logged')==='1'){renderContent()}
+document.getElementById('entityModal').addEventListener('click',e=>{if(e.target.id==='entityModal')closeModal()});
+
+// ===== User Management =====
+let currentUserDetail = null;
+
+function renderUsers(el){
+  if(currentUserDetail){
+    renderUserDetail(el);
+    return;
+  }
+  const users=JSON.parse(localStorage.getItem('pl_users')||'[]');
+  const orders=JSON.parse(localStorage.getItem('pl_orders')||'[]');
+  
+  let html='<div class="panel"><div class="panel-toolbar"><span style="font-size:13px;color:var(--text-muted);">共 '+users.length+' 个注册用户</span></div>';
+  if(users.length===0){html+='<div class="admin-empty">暂无注册用户</div></div>';el.innerHTML=html;return}
+  
+  html+='<table class="admin-table"><thead><tr><th>用户名</th><th>邮箱</th><th>注册时间</th><th>最后登录</th><th>登录IP数</th><th>浏览次数</th><th>订单数</th><th>累计消费</th><th>操作</th></tr></thead><tbody>';
+  users.forEach(u=>{
+    const regDate=new Date(u.registerDate).toLocaleDateString('zh-CN');
+    const lastLogin=u.lastLogin?new Date(u.lastLogin).toLocaleString('zh-CN'):'-';
+    const ipCount=(u.loginIPs||[]).length;
+    const totalViews=u.totalViews||0;
+    const userOrders=orders.filter(o=>o.userId===u.id);
+    const totalSpent=(u.totalSpent||0).toFixed(2);
+    html+='<tr><td><b>'+u.username+'</b></td><td>'+u.email+'</td><td>'+regDate+'</td><td>'+lastLogin+'</td>'+
+    '<td>'+ipCount+'</td><td>'+totalViews+'</td><td>'+userOrders.length+'</td><td><b>$'+totalSpent+'</b></td>'+
+    '<td><button class="btn btn-primary btn-sm" onclick="viewUserDetail(\''+u.id+'\')">详情</button> '+
+    '<button class="btn btn-danger btn-sm" onclick="deleteUser(\''+u.id+'\')">删除</button></td></tr>';
+  });
+  html+='</tbody></table></div>';
+  el.innerHTML=html;
+}
+
+function viewUserDetail(uid){
+  const users=JSON.parse(localStorage.getItem('pl_users')||'[]');
+  currentUserDetail=users.find(u=>u.id===uid);
+  renderContent();
+}
+
+function backToUserList(){
+  currentUserDetail=null;
+  renderContent();
+}
+
+function renderUserDetail(el){
+  const u=currentUserDetail;
+  const orders=JSON.parse(localStorage.getItem('pl_orders')||'[]');
+  const userOrders=orders.filter(o=>o.userId===u.id).sort((a,b)=>new Date(b.orderDate)-new Date(a.orderDate));
+  const productViews=u.productViews||{};
+  const viewEntries=Object.entries(productViews).sort((a,b)=>b[1]-a[1]);
+  
+  // Build chart data - last 7 days activity
+  const days=[];
+  const viewData=[];
+  const spendData=[];
+  for(let i=6;i>=0;i--){
+    const d=new Date();
+    d.setDate(d.getDate()-i);
+    const dateStr=d.toISOString().split('T')[0];
+    days.push(d.getMonth()+1+'/'+d.getDate());
+    // Count views on this day (approximate - we don't have timestamps, so distribute)
+    viewData.push(0);
+    spendData.push(0);
+  }
+  // Fill in actual order data by date
+  userOrders.forEach(o=>{
+    const orderDate=new Date(o.orderDate).toISOString().split('T')[0];
+    const idx=days.findIndex((_,i)=>{
+      const d=new Date();d.setDate(d.getDate()-(6-i));
+      return d.toISOString().split('T')[0]===orderDate;
+    });
+    if(idx>=0)spendData[idx]+=o.total;
+  });
+  // Distribute views roughly
+  const totalViews=u.totalViews||0;
+  if(totalViews>0 && viewEntries.length>0){
+    const avgPerDay=Math.floor(totalViews/7);
+    for(let i=0;i<7;i++)viewData[i]=avgPerDay+Math.floor(Math.random()*avgPerDay);
+  }
+  
+  // Generate SVG line chart
+  const chartW=600,chartH=200,pad=40;
+  const maxVal=Math.max(...viewData,...spendData,1);
+  const xStep=(chartW-pad*2)/(days.length-1);
+  const yScale=(chartH-pad*2)/maxVal;
+  
+  function toPath(data){
+    return data.map((v,i)=>{
+      const x=pad+i*xStep;
+      const y=chartH-pad-v*yScale;
+      return (i===0?'M':'L')+x.toFixed(1)+','+y.toFixed(1);
+    }).join(' ');
+  }
+  
+  const gridLines=[];
+  for(let i=0;i<=4;i++){
+    const y=pad+i*(chartH-pad*2)/4;
+    gridLines.push('<line x1="'+pad+'" y1="'+y+'" x2="'+(chartW-pad)+'" y2="'+y+'" stroke="#e0e0e0" stroke-width="1"/>');
+    gridLines.push('<text x="'+(pad-5)+'" y="'+(y+4)+'" text-anchor="end" font-size="10" fill="#999">'+Math.round(maxVal*(1-i/4))+'</text>');
+  }
+  const xLabels=days.map((d,i)=>'<text x="'+(pad+i*xStep)+'" y="'+(chartH-pad+15)+'" text-anchor="middle" font-size="10" fill="#999">'+d+'</text>').join('');
+  
+  const chartSvg='<svg width="100%" height="'+chartH+'" viewBox="0 0 '+chartW+' '+chartH+'" style="background:#fafafa;border-radius:8px;">'+
+    gridLines.join('')+xLabels+
+    '<path d="'+toPath(viewData)+'" fill="none" stroke="#3498db" stroke-width="2"/>'+
+    '<path d="'+toPath(spendData)+'" fill="none" stroke="#e74c3c" stroke-width="2"/>'+
+    viewData.map((v,i)=>'<circle cx="'+(pad+i*xStep)+'" cy="'+(chartH-pad-v*yScale)+'" r="3" fill="#3498db"/>').join('')+
+    spendData.map((v,i)=>'<circle cx="'+(pad+i*xStep)+'" cy="'+(chartH-pad-v*yScale)+'" r="3" fill="#e74c3c"/>').join('')+
+    '</svg>';
+  
+  // IP list
+  const ipList=(u.loginIPs||[]).map((ip,i)=>'<span style="display:inline-block;background:#f0f0f0;padding:3px 10px;border-radius:12px;font-size:12px;margin:2px;font-family:monospace;">'+ip+'</span>').join('');
+  
+  // Product views list
+  let viewsHtml='';
+  if(viewEntries.length===0){
+    viewsHtml='<p style="color:var(--text-light);font-size:13px;">暂无浏览记录</p>';
+  }else{
+    viewsHtml='<table class="admin-table"><thead><tr><th>产品</th><th>浏览次数</th></tr></thead><tbody>';
+    viewEntries.forEach(([pid,count])=>{
+      const product=PRODUCTS.find(p=>p.id===pid);
+      const pname=product?product.name:pid;
+      viewsHtml+='<tr><td>'+pname+'</td><td>'+count+' 次</td></tr>';
+    });
+    viewsHtml+='</tbody></table>';
+  }
+  
+  // Orders list
+  let ordersHtml='';
+  if(userOrders.length===0){
+    ordersHtml='<p style="color:var(--text-light);font-size:13px;">暂无订单</p>';
+  }else{
+    ordersHtml='<table class="admin-table"><thead><tr><th>订单号</th><th>下单时间</th><th>商品数</th><th>金额</th><th>状态</th><th>运单号</th></tr></thead><tbody>';
+    userOrders.forEach(o=>{
+      const date=new Date(o.orderDate).toLocaleString('zh-CN');
+      const status=o.status==='shipped'?'<span style="color:#155724;">已发货</span>':'<span style="color:#856404;">未发货</span>';
+      ordersHtml+='<tr><td>'+o.id+'</td><td>'+date+'</td><td>'+o.items.reduce((s,i)=>s+i.qty,0)+' 件</td><td>$'+o.total.toFixed(2)+'</td><td>'+status+'</td><td>'+(o.trackingNumber||'-')+'</td></tr>';
+    });
+    ordersHtml+='</tbody></table>';
+  }
+  
+  let html='<button class="btn btn-secondary" style="margin-bottom:16px;" onclick="backToUserList()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:middle;"><polyline points="15 18 9 12 15 6"/></svg> 返回用户列表</button>';
+  
+  html+='<div class="panel" style="margin-bottom:16px;"><div class="panel-toolbar"><h3 style="font-size:16px;margin:0;">用户基本信息</h3></div>'+
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;padding:16px;">'+
+    '<div><div style="font-size:12px;color:var(--text-light);margin-bottom:4px;">用户名</div><div style="font-size:15px;font-weight:600;">'+u.username+'</div></div>'+
+    '<div><div style="font-size:12px;color:var(--text-light);margin-bottom:4px;">邮箱</div><div style="font-size:15px;">'+u.email+'</div></div>'+
+    '<div><div style="font-size:12px;color:var(--text-light);margin-bottom:4px;">密码</div><div style="font-size:15px;font-family:monospace;">'+u.password+'</div></div>'+
+    '<div><div style="font-size:12px;color:var(--text-light);margin-bottom:4px;">注册时间</div><div style="font-size:15px;">'+new Date(u.registerDate).toLocaleString('zh-CN')+'</div></div>'+
+    '<div><div style="font-size:12px;color:var(--text-light);margin-bottom:4px;">最后登录</div><div style="font-size:15px;">'+(u.lastLogin?new Date(u.lastLogin).toLocaleString('zh-CN'):'-')+'</div></div>'+
+    '<div><div style="font-size:12px;color:var(--text-light);margin-bottom:4px;">累计消费</div><div style="font-size:15px;font-weight:600;color:var(--primary);">$'+(u.totalSpent||0).toFixed(2)+'</div></div>'+
+    '<div><div style="font-size:12px;color:var(--text-light);margin-bottom:4px;">联系电话</div><div style="font-size:15px;">'+(u.phone||'-')+'</div></div>'+
+    '</div>'+
+    '<div style="padding:0 16px 16px;"><div style="font-size:12px;color:var(--text-light);margin-bottom:8px;">登录IP记录（共 '+(u.loginIPs||[]).length+' 个）</div>'+ipList+'</div>'+
+    '<div style="padding:0 16px 16px;"><div style="font-size:12px;color:var(--text-light);margin-bottom:8px;">管理员备注</div>'+
+    '<textarea id="userNote" rows="3" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px;resize:vertical;" placeholder="添加备注...">'+(u.note||'')+'</textarea>'+
+    '<button class="btn btn-primary btn-sm" style="margin-top:8px;" onclick="saveUserNote(\''+u.id+'\')">保存备注</button></div>'+
+    '</div>';
+  
+  // Shipping addresses section
+  const addresses = u.addresses || [];
+  let addressesHtml = '';
+  if(addresses.length === 0){
+    addressesHtml = '<p style="color:var(--text-light);font-size:13px;">暂无收货地址</p>';
+  }else{
+    addressesHtml = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;">';
+    addresses.forEach((addr, idx) => {
+      addressesHtml += '<div style="border:1px solid var(--border);border-radius:8px;padding:14px;background:#fafafa;">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'+
+          '<span style="font-weight:600;font-size:14px;">地址 '+(idx+1)+(addr.usedCount>1?' (常用)':'')+'</span>'+
+          '<span style="font-size:11px;color:var(--text-light);">使用'+(addr.usedCount||1)+'次</span>'+
+        '</div>'+
+        '<div style="font-size:13px;line-height:1.8;">'+
+          '<div><b>'+(addr.firstName||'')+' '+(addr.lastName||'')+'</b></div>'+
+          '<div>邮箱: '+(addr.email||'-')+'</div>'+
+          '<div>电话: '+(addr.phone||'-')+'</div>'+
+          '<div>地址: '+(addr.address||'-')+'</div>'+
+          '<div>'+(addr.city||'-')+', '+(addr.zip||'-')+'</div>'+
+          '<div>国家: '+(addr.country||'-')+'</div>'+
+          (addr.lastUsed?'<div style="color:var(--text-light);font-size:11px;margin-top:4px;">最后使用: '+new Date(addr.lastUsed).toLocaleDateString('zh-CN')+'</div>':'')+
+        '</div>'+
+      '</div>';
+    });
+    addressesHtml += '</div>';
+  }
+  
+  html+='<div class="panel" style="margin-bottom:16px;"><div class="panel-toolbar"><h3 style="font-size:16px;margin:0;">收货地址（共 '+addresses.length+' 个）</h3></div>'+
+    '<div style="padding:16px;">'+addressesHtml+'</div></div>';
+
+  html+='<div class="panel" style="margin-bottom:16px;"><div class="panel-toolbar"><h3 style="font-size:16px;margin:0;">近7天活动趋势</h3>'+
+    '<div style="display:flex;gap:16px;font-size:12px;">'+
+    '<span style="display:flex;align-items:center;gap:4px;"><span style="width:12px;height:3px;background:#3498db;display:inline-block;"></span>浏览次数</span>'+
+    '<span style="display:flex;align-items:center;gap:4px;"><span style="width:12px;height:3px;background:#e74c3c;display:inline-block;"></span>消费金额($)</span>'+
+    '</div></div>'+
+    '<div style="padding:16px;">'+chartSvg+'</div></div>';
+  
+  html+='<div class="panel" style="margin-bottom:16px;"><div class="panel-toolbar"><h3 style="font-size:16px;margin:0;">浏览产品记录（共 '+(u.totalViews||0)+' 次）</h3></div>'+
+    '<div style="padding:16px;">'+viewsHtml+'</div></div>';
+  
+  html+='<div class="panel"><div class="panel-toolbar"><h3 style="font-size:16px;margin:0;">购买订单记录（共 '+userOrders.length+' 单）</h3></div>'+
+    '<div style="padding:16px;">'+ordersHtml+'</div></div>';
+  
+  el.innerHTML=html;
+}
+
+function saveUserNote(uid){
+  const note=document.getElementById('userNote').value;
+  const users=JSON.parse(localStorage.getItem('pl_users')||'[]');
+  const u=users.find(x=>x.id===uid);
+  if(u){
+    u.note=note;
+    localStorage.setItem('pl_users',JSON.stringify(users));
+    if(currentUserDetail&&currentUserDetail.id===uid)currentUserDetail.note=note;
+    showToast('备注已保存');
+  }
+}
+
+function deleteUser(uid){
+  if(!confirm('确定删除该用户？该用户的所有数据将被清除。'))return;
+  let users=JSON.parse(localStorage.getItem('pl_users')||'[]');
+  users=users.filter(u=>u.id!==uid);
+  localStorage.setItem('pl_users',JSON.stringify(users));
+  showToast('用户已删除');
+  renderContent();
+}
+
+
+</script>
+</body>
+</html>
