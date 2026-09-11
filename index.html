@@ -202,16 +202,16 @@ ul{list-style:none}
 .verified-badge.purchased{background:#e8f5e9;color:#2e7d32}
 
 .verified-badge.not-purchased{background:#f5f5f5;color:#999}
-.review-upload-row{display:flex;gap:12px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.review-upload-row{display:flex;gap:12px;align-items:center;margin-bottom:12px;flex-wrap:wrap;position:relative;z-index:1}
 .review-upload-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:2px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px;color:var(--text);background:var(--surface);transition:all .2s;user-select:none}
 .review-upload-btn:hover{border-color:var(--primary);color:var(--primary)}
 .review-emoji-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:2px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px;color:var(--text);background:var(--surface);transition:all .2s;user-select:none;position:relative}
 .review-emoji-btn:hover{border-color:var(--primary);color:var(--primary)}
-.emoji-picker{position:absolute;bottom:calc(100% + 8px);left:0;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:100;display:none;max-width:280px}
+.emoji-picker{position:absolute;top:calc(100% + 8px);left:0;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px;box-shadow:0 4px 16px rgba(0,0,0,.2);z-index:100;display:none;width:280px;max-height:240px;overflow-y:auto}
 .emoji-picker.show{display:block}
-.emoji-picker-title{font-size:12px;color:var(--text-muted);margin-bottom:8px;font-weight:600}
-.emoji-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:4px}
-.emoji-item{font-size:20px;padding:4px;cursor:pointer;border-radius:4px;text-align:center;transition:background .15s}
+.emoji-picker-title{font-size:12px;color:var(--text-muted);margin-bottom:8px;font-weight:600;position:sticky;top:0;background:var(--surface);padding:4px 0;z-index:1}
+.emoji-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:2px}
+.emoji-item{font-size:18px;padding:6px 2px;cursor:pointer;border-radius:4px;text-align:center;transition:background .15s;line-height:1}
 .emoji-item:hover{background:var(--bg)}
 
 
@@ -1139,7 +1139,7 @@ function hasPurchasedProduct(userId, productId, productName){
     });
   });
 }
-const EMOJI_LIST=['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐','🥴','🤢','🤮','🤧','😷','🤒','🤕','🤑','🤠','👍','👎','👌','✌️','🤞','🤟','🤘','👊','👏','🙌','👐','🤲','🙏','💪','❤️','💔','💕','💖','💗','💘','💝','💞','💟','🔥','⭐','🌟','✨','💫','🎉','🎊','🎁','🏆','🥇','💯','✅','❌','⚠️','💊','💉','🧬','🔬','⚗️','📦','🚚','✈️','🌍','🇺🇸','🇲🇽','🇨🇦','🇬🇧','🇩🇪','🇫🇷','🇪🇸','🇮🇹','🇦🇺'];
+const EMOJI_LIST=['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐','🥴','🤢','🤮','🤧','😷','🤒','🤕','🤑','🤠','👍','👎','👌','✌️','🤞','🤟','🤘','👊','👏','🙌','👐','🤲','🙏','💪','❤️','💔','💕','💖','💗','💘','💝','💞','💟','🔥','⭐','🌟','✨','💫','🎉','🎊','🎁','🏆','🥇','💯','✅','❌','⚠️','💊','💉','🧬','🔬','⚗️','📦','🚚','✈️','🌍','💵','💰','🛒','📞','📧','🌐','⏰','📅','🔔','💬','📝','🔍','💡','🎯','🚀','💎','🌈','☀️','🌙','⚡','🌊','🍀','🎵'];
 function getEmojiList(){return EMOJI_LIST.map(e=>'<span class="emoji-item" onclick="insertEmoji(\''+e.replace(/'/g,"\\'")+'\')">'+e+'</span>').join('');}
 function toggleEmojiPicker(e){
   e.stopPropagation();
