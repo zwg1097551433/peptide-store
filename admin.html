@@ -126,7 +126,15 @@ input,select,textarea{font-family:inherit;font-size:14px}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/pptxjs@1.2.0/dist/pptxjs.browser.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script>pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
+<script>
+window.pdfJsLoaded = false;
+if (typeof pdfjsLib !== 'undefined') {
+  try {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    window.pdfJsLoaded = true;
+  } catch(e) { console.warn('PDF.js worker setup failed:', e); }
+}
+</script>
 </head>
 <body>
 
@@ -372,7 +380,27 @@ function uploadCOAImages(){
   if(!input.files||input.files.length===0){showToast('请选择文件');return}
   const files=Array.from(input.files);
   let processed=0;
+  let successCount=0;
+  let failCount=0;
   const total=files.length;
+  
+  function fileDone(success){
+    processed++;
+    if(success)successCount++;else failCount++;
+    if(processed===total){
+      if(successCount>0){
+        applyWatermarkToAllImages().then(()=>{
+          saveData('coa');
+          const imgCount=(currentEditingCOABatch.images||[]).length;
+          showToast('上传完成: '+successCount+'个文件成功, 当前批次共'+imgCount+'张图片');
+          openCOABatchForm(currentEditingCOABatch.id);
+        });
+      }else{
+        showToast('上传失败: '+failCount+'个文件转换失败, 请检查文件格式或重试');
+      }
+    }
+  }
+  
   files.forEach(file=>{
     const ext=file.name.split('.').pop().toLowerCase();
     if(ext==='pptx'||ext==='ppt'){
@@ -380,27 +408,44 @@ function uploadCOAImages(){
         images.forEach((imgData,i)=>{
           addCOAImageWithOriginal(file.name.replace(/\.(pptx?)$/i,'')+'_页'+(i+1)+'.png',imgData);
         });
-        processed++;
-        checkUploadComplete(processed,total);
-      }).catch(err=>{showToast('PPT转换失败: '+file.name);processed++;checkUploadComplete(processed,total)});
+        fileDone(true);
+      }).catch(err=>{
+        console.error('PPT转换失败:', err);
+        showToast('PPT转换失败: '+file.name);
+        fileDone(false);
+      });
     }else if(ext==='pdf'){
+      if(!window.pdfJsLoaded){
+        showToast('PDF转换库未加载, 请刷新页面后重试');
+        fileDone(false);
+        return;
+      }
       convertPDFToImages(file).then(images=>{
+        if(images.length===0){
+          showToast('PDF无有效页面: '+file.name);
+          fileDone(false);
+          return;
+        }
         images.forEach((imgData,i)=>{
           addCOAImageWithOriginal(file.name.replace(/\.pdf$/i,'')+'_页'+(i+1)+'.png',imgData);
         });
-        processed++;
-        checkUploadComplete(processed,total);
-      }).catch(err=>{showToast('PDF转换失败: '+file.name);processed++;checkUploadComplete(processed,total)});
+        fileDone(true);
+      }).catch(err=>{
+        console.error('PDF转换失败:', err);
+        showToast('PDF转换失败: '+file.name+' - '+err.message);
+        fileDone(false);
+      });
     }else{
       const reader=new FileReader();
       reader.onload=e=>{
         addCOAImageWithOriginal(file.name,e.target.result);
-        processed++;
-        checkUploadComplete(processed,total);
+        fileDone(true);
       };
+      reader.onerror=()=>{fileDone(false)};
       reader.readAsDataURL(file);
     }
   });
+  input.value='';
 }
 function checkUploadComplete(processed,total){
   if(processed===total){
@@ -526,17 +571,24 @@ function convertPDFToImages(file){
             canvas.width=viewport.width;
             canvas.height=viewport.height;
             const ctx=canvas.getContext('2d');
-            page.render({canvasContext:ctx,viewport:viewport}).promise.then(()=>{
+            const renderTask=page.render({canvasContext:ctx,viewport:viewport});
+            renderTask.promise.then(()=>{
               images.push(canvas.toDataURL('image/png'));
               pageNum++;
-              setTimeout(renderNextPage,50);
-            }).catch(reject);
-          }).catch(reject);
+              setTimeout(renderNextPage,30);
+            }).catch(err=>{
+              console.error('Page render error:', err);
+              reject(err);
+            });
+          }).catch(err=>{reject(err)});
         }
         renderNextPage();
-      }).catch(reject);
+      }).catch(err=>{
+        console.error('PDF load error:', err);
+        reject(new Error('PDF文件解析失败: '+err.message));
+      });
     };
-    reader.onerror=reject;
+    reader.onerror=()=>reject(new Error('文件读取失败'));
     reader.readAsArrayBuffer(file);
   });
 }
