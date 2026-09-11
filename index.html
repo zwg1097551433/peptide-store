@@ -637,7 +637,7 @@ body{padding-bottom:64px}
         <h3 data-i18n="checkout.summary">Order Summary</h3>
         <div id="checkoutItems"></div>
         <div class="summary-row"><span data-i18n="checkout.subtotal">Subtotal</span><span id="checkoutSubtotal">$0.00</span></div>
-        <div class="summary-row"><span data-i18n="checkout.shippingFee">Shipping</span><span data-i18n="checkout.free">Free</span></div>
+        <div class="summary-row"><span data-i18n="checkout.shippingFee">Shipping</span><span id="checkoutShipping">$69.00</span></div>
         <div class="summary-row total"><span data-i18n="checkout.total">Total</span><span id="checkoutTotal">$0.00</span></div>
         <button class="pay-btn" onclick="placeOrder()" data-i18n="checkout.payNow">Pay Now</button>
         <p class="pay-notice" data-i18n="checkout.secure">Secure checkout · PayPal Buyer Protection</p>
@@ -824,6 +824,7 @@ const I18N = {
 
 let currentLang = localStorage.getItem('pl_lang') || 'en';
 let cart = Store.get('cart', []);
+const SHIPPING_FEE = 69; // Flat rate shipping USD
 let clickData = Store.get('clicks', {});
 let currentTab = 'hot';
 let catState = {level:0,cat:null,sub:null,product:null};
@@ -1932,7 +1933,8 @@ function placeOrder(){
     };
   });
   
-  const total = orderItems.reduce((sum, item) => sum + item.price * item.qty, 0);
+  const subtotal = orderItems.reduce((sum, item) => sum + item.price * item.qty, 0);
+  const total = subtotal + SHIPPING_FEE;
   
   const order = {
     id: orderId,
@@ -2041,6 +2043,7 @@ function renderOrders(){
       '</div>' +
       '<div class="order-date">Ordered on ' + date + '</div>' +
       '<div class="order-items">' + itemsHtml + '</div>' +
+      '<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;color:var(--text-muted)"><span>Shipping (Flat Rate)</span><span>$69.00</span></div>' +
       '<div class="order-total"><span>Total</span><span>$' + order.total.toFixed(2) + '</span></div>' +
       trackingHtml +
     '</div>';
@@ -2066,9 +2069,13 @@ function renderCheckout(){
     return '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;"><span>' + item.name + ' (' + item.spec + ') x' + item.qty + '</span><span>$' + (item.price*item.qty).toFixed(2) + '</span></div>';
   }).join('');
   
-  const total = cartTotal();
+  const subtotal = cartTotal();
+  const shipping = cart.length > 0 ? SHIPPING_FEE : 0;
+  const total = subtotal + shipping;
   totalEl.textContent = '$' + total.toFixed(2);
-  if(subtotalEl)subtotalEl.textContent = '$' + total.toFixed(2);
+  if(subtotalEl)subtotalEl.textContent = '$' + subtotal.toFixed(2);
+  const shippingEl = document.getElementById('checkoutShipping');
+  if(shippingEl)shippingEl.textContent = shipping > 0 ? '$' + shipping.toFixed(2) : '$0.00';
 }
 
 function prefillCheckoutForm(){
