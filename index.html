@@ -1026,7 +1026,7 @@ function submitComment(postId){
   const post=FORUM_POSTS.find(p=>p.id===postId);
   if(!post)return;
   if(!post.comments)post.comments=[];
-  post.comments.push({id:'c_'+Date.now(),userId:currentUser.id,username:currentUser.username,content:content,date:new Date().toISOString().split('T')[0],likes:0,likedBy:[],images:_commentImages.slice()});
+  post.comments.push({id:'c_'+Date.now(),userId:currentUser.id,username:currentUser.nickname||currentUser.username,content:content,date:new Date().toISOString().split('T')[0],likes:0,likedBy:[],images:_commentImages.slice()});
   post.replies=post.comments.length;
   Store.set('forum',FORUM_POSTS);
   showToast('Comment posted!');
@@ -1339,7 +1339,7 @@ function submitProductReview(){
   if(reviewRating===0){showToast('Please select a rating (1-5 stars)');return;}
   const content=document.getElementById('reviewContent').value.trim();
   if(!content){showToast('Please write your review');return;}
-  const newReview={id:'rev_'+Date.now(),productId:currentProduct.id,productName:currentProduct.name,userId:currentUser.id,username:currentUser.username,rating:reviewRating,content:content,images:reviewImages.slice(),date:new Date().toISOString().split('T')[0]};
+  const newReview={id:'rev_'+Date.now(),productId:currentProduct.id,productName:currentProduct.name,userId:currentUser.id,username:currentUser.nickname||currentUser.username,rating:reviewRating,content:content,images:reviewImages.slice(),date:new Date().toISOString().split('T')[0]};
   REVIEWS.unshift(newReview);
   Store.set('reviews', REVIEWS);
   showToast('Review submitted successfully!');
@@ -1404,6 +1404,7 @@ function doRegister(){
   const newUser = {
     id: 'u' + Date.now(),
     username: name,
+    nickname: name,
     email: email,
     password: password,
     registerDate: new Date().toISOString(),
@@ -1474,7 +1475,7 @@ function updateUserUI(){
   
   if(currentUser){
     if(userBtn)userBtn.classList.add('logged-in');
-    if(headerEl)headerEl.textContent = currentUser.username;
+    if(headerEl)headerEl.textContent = currentUser.nickname || currentUser.username;
     if(loginItem)loginItem.style.display = 'none';
     if(profileItem)profileItem.style.display = 'block';
     if(postsItem)postsItem.style.display = 'block';
@@ -1511,7 +1512,7 @@ function renderUserCenter(tab){
   
   let content='';
   if(tab==='profile'){
-    content='<div class="user-profile-header"><div class="user-avatar" onclick="document.getElementById(\'avatarInput\').click()">'+avatarHtml+'<input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="handleAvatarUpload(event)"></div><div class="user-info"><div class="user-info-name">'+u.username+'</div><div class="user-info-email">📧 '+(u.email||'No email')+'</div><div class="user-edit-row"><input type="text" id="editUsername" class="user-edit-input" value="'+(u.username||'')+'" placeholder="Username"><button class="user-save-btn" onclick="saveUsername()">Save</button></div></div></div><div style="padding:16px;background:var(--bg);border-radius:12px"><div style="font-weight:600;margin-bottom:12px">Account Info</div><div style="font-size:13px;line-height:2"><div><strong>Username:</strong> '+u.username+'</div><div><strong>Email:</strong> '+(u.email||'-')+'</div><div><strong>Member since:</strong> '+(u.createdAt||u.date||'-')+'</div><div><strong>Total orders:</strong> '+(u.orders?u.orders.length:0)+'</div><div><strong>Total spent:</strong> $'+((u.totalSpent||0).toFixed(2))+'</div></div></div>';
+    const displayName=u.nickname||u.username;    content='<div class="user-profile-header"><div class="user-avatar" onclick="document.getElementById(\'avatarInput\').click()">'+avatarHtml+'<input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="handleAvatarUpload(event)"></div><div class="user-info"><div class="user-info-name">'+displayName+'</div><div class="user-info-email">📧 '+(u.email||'No email')+'</div><div style="font-size:12px;color:var(--text-muted);margin-top:4px">Account: '+u.username+' (cannot be changed)</div><div class="user-edit-row"><input type="text" id="editNickname" class="user-edit-input" value="'+(u.nickname||u.username||'')+'" placeholder="Nickname"><button class="user-save-btn" onclick="saveNickname()">Save</button></div></div></div><div style="padding:16px;background:var(--bg);border-radius:12px"><div style="font-weight:600;margin-bottom:12px">Account Info</div><div style="font-size:13px;line-height:2"><div><strong>Account:</strong> '+u.username+'</div><div><strong>Nickname:</strong> '+(u.nickname||u.username)+'</div><div><strong>Email:</strong> '+(u.email||'-')+'</div><div><strong>Member since:</strong> '+(u.createdAt||u.registerDate||u.date||'-')+'</div><div><strong>Total orders:</strong> '+(u.orders?u.orders.length:0)+'</div><div><strong>Total spent:</strong> $'+((u.totalSpent||0).toFixed(2))+'</div></div></div>';
   }else if(tab==='posts'){
     const myPosts=FORUM_POSTS.filter(p=>p.userId===u.id);
     const commentedPosts=FORUM_POSTS.filter(p=>p.comments&&p.comments.some(cm=>cm.userId===u.id));
@@ -1531,14 +1532,14 @@ function renderUserCenter(tab){
   const html='<div class="modal-overlay open" onclick="if(event.target===this)closeModal()"><div class="modal user-center-modal"><div class="modal-header"><h3>My Account</h3><button class="modal-close" onclick="closeModal()" style="font-size:24px;background:none;border:none;cursor:pointer;color:#666">×</button></div><div class="user-center-body">'+tabs+content+'</div></div></div>';
   showModal(html);
 }
-function saveUsername(){
-  const newName=document.getElementById('editUsername').value.trim();
-  if(!newName){showToast('Username cannot be empty');return;}
-  currentUser.username=newName;
+function saveNickname(){
+  const newName=document.getElementById('editNickname').value.trim();
+  if(!newName){showToast('Nickname cannot be empty');return;}
+  currentUser.nickname=newName;
   saveCurrentUser();
   const userIdx=USERS.findIndex(u=>u.id===currentUser.id);
-  if(userIdx>=0){USERS[userIdx].username=newName;Store.set('users',USERS);}
-  showToast('Username updated!');
+  if(userIdx>=0){USERS[userIdx].nickname=newName;Store.set('users',USERS);}
+  showToast('Nickname updated!');
   updateUserUI();
   renderUserCenter('profile');
 }
