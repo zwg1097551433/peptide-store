@@ -1170,7 +1170,7 @@ function submitProductReview(){
   if(!content){showToast('Please write your review');return;}
   const newReview={id:'rev_'+Date.now(),productId:currentProduct.id,productName:currentProduct.name,userId:currentUser.id,username:currentUser.username,rating:reviewRating,content:content,images:reviewImages.slice(),date:new Date().toISOString().split('T')[0]};
   REVIEWS.unshift(newReview);
-  saveData('reviews');
+  Store.set('reviews', REVIEWS);
   showToast('Review submitted successfully!');
   renderProductReviews();
   renderReviews();
