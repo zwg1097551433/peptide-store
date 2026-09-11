@@ -490,10 +490,10 @@ body{padding-bottom:64px}
   <button class="icon-btn mobile-menu-btn" onclick="toggleMobileNav()" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
   <div class="logo" onclick="navigate('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3v6l-5 9a2 2 0 001.8 3h12.4a2 2 0 001.8-3l-5-9V3"/><line x1="9" y1="3" x2="15" y2="3"/><line x1="7" y1="15" x2="17" y2="15"/></svg><span>AVATR</span></div>
   <nav class="main-nav" id="mainNav">
-    <div class="nav-item active" data-i18n="nav.home" onclick="navigate('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></div>
-    <div class="nav-item" data-i18n="nav.announcement" onclick="openAnnouncement()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 11-5.8-1.6"/></svg><span>Announcements</span></div>
-    <div class="nav-item" data-i18n="nav.forum" onclick="navigate('forum')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span>Discussion</span></div>
-    <div class="nav-item" data-i18n="nav.about" onclick="openAboutUs()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><span>About Us</span></div>
+    <div class="nav-item active" onclick="navigate('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span data-i18n="nav.home">Home</span></div>
+    <div class="nav-item" onclick="openAnnouncement()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 11-5.8-1.6"/></svg><span data-i18n="nav.announcement">Announcements</span></div>
+    <div class="nav-item" onclick="navigate('forum')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span data-i18n="nav.forum">Discussion</span></div>
+    <div class="nav-item" onclick="openAboutUs()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><span data-i18n="nav.about">About Us</span></div>
   </nav>
   <div class="header-actions">
     <div class="header-search-wrap">
@@ -817,8 +817,8 @@ function navigate(v, skipHistory){
   const t=document.getElementById('view-'+v);
   if(t)t.classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  if(v==='home')document.querySelector('.nav-item[data-i18n="nav.home"]').classList.add('active');
-  if(v==='forum')document.querySelector('.nav-item[data-i18n="nav.forum"]').classList.add('active');
+  if(v==='home')document.querySelector('.nav-item span[data-i18n="nav.home"]').parentElement.classList.add('active');
+  if(v==='forum')document.querySelector('.nav-item span[data-i18n="nav.forum"]').parentElement.classList.add('active');
   document.getElementById('mainNav').classList.remove('open');
   window.scrollTo({top:0,behavior:'smooth'});
   if(v==='checkout'){renderCheckout();setTimeout(prefillCheckoutForm,100);}
@@ -1046,7 +1046,7 @@ function submitComment(postId){
   renderForumPreview();
 }
 function renderAnnouncements(){document.getElementById('announcementBody').innerHTML=ANNOUNCEMENTS.map(a=>'<div style="margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border-light);"><div class="announcement-date">'+a.date+'</div><h4 style="font-size:14px;margin-bottom:6px;">'+a.title+'</h4><p>'+a.body+'</p></div>').join('')}
-function openAboutUs(){document.getElementById('aboutUsModal').classList.add('show');}
+function openAboutUs(){document.getElementById('aboutUsModal').classList.add('open');}
 function openAnnouncement(){document.getElementById('announcementModal').classList.add('open')}
 function showModal(html){
   let m=document.getElementById('dynamicModal');
