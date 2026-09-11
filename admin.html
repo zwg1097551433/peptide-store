@@ -124,6 +124,7 @@ input,select,textarea{font-family:inherit;font-size:14px}
 .form-row{grid-template-columns:1fr}
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/pptxjs@1.2.0/dist/pptxjs.browser.min.js"></script>
 </head>
 <body>
 
@@ -326,7 +327,7 @@ function openCOABatchForm(batchId){
   html+='<div style="grid-column:1/-1;"><label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">包含产品</label><input type="text" id="coaBatchProducts" value="'+(b.products||'')+'" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;" placeholder="如 Tirzepatide, Semaglutide"></div>';
   html+='</div>';
   if(isEdit){
-    html+='<div style="margin-bottom:16px;"><label style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;">上传COA报告图片（可多选）</label><input type="file" id="coaImageUpload" accept="image/*" multiple style="margin-bottom:12px;"><button class="btn btn-primary btn-sm" onclick="uploadCOAImages()">上传图片</button></div>';
+    html+='<div style="margin-bottom:16px;"><label style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;">上传COA报告图片（可多选）</label><input type="file" id="coaImageUpload" accept="image/*,.pptx,.ppt" multiple style="margin-bottom:12px;"><p style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">支持图片(JPG/PNG/GIF)和PPT/PPTX格式，上传后自动添加水印</p><button class="btn btn-primary btn-sm" onclick="uploadCOAImages()">上传图片</button></div>';
     const imgs=b.images||[];
     if(imgs.length>0){
       html+='<h4 style="margin-bottom:12px;font-size:14px;">已上传图片 ('+imgs.length+')</h4><div class="coa-image-list">';
@@ -362,21 +363,126 @@ function saveCOABatch(){
 }
 function uploadCOAImages(){
   const input=document.getElementById('coaImageUpload');
-  if(!input.files||input.files.length===0){showToast('请选择图片');return}
-  let uploaded=0;
-  Array.from(input.files).forEach(file=>{
-    const reader=new FileReader();
-    reader.onload=e=>{
-      if(!currentEditingCOABatch.images)currentEditingCOABatch.images=[];
-      currentEditingCOABatch.images.push({id:'img_'+Date.now()+'_'+Math.random().toString(36).substr(2,5),name:file.name,data:e.target.result});
-      uploaded++;
-      if(uploaded===input.files.length){
-        saveData('coa');
-        showToast('已上传 '+uploaded+' 张图片');
-        openCOABatchForm(currentEditingCOABatch.id);
+  if(!input.files||input.files.length===0){showToast('请选择文件');return}
+  const files=Array.from(input.files);
+  let processed=0;
+  files.forEach(file=>{
+    const ext=file.name.split('.').pop().toLowerCase();
+    if(ext==='pptx'||ext==='ppt'){
+      convertPPTToImages(file).then(images=>{
+        images.forEach((imgData,i)=>{
+          addCOAImageWithWatermark(file.name.replace(/\.(pptx?)$/i,'')+'_页'+(i+1)+'.png',imgData);
+        });
+        processed++;
+        if(processed===files.length){saveData('coa');showToast('上传完成');openCOABatchForm(currentEditingCOABatch.id)}
+      }).catch(err=>{showToast('PPT转换失败: '+file.name);processed++;if(processed===files.length){openCOABatchForm(currentEditingCOABatch.id)}});
+    }else{
+      const reader=new FileReader();
+      reader.onload=e=>{
+        addWatermarkToImage(e.target.result,file.name).then(watermarked=>{
+          addCOAImageWithWatermark(file.name,watermarked);
+          processed++;
+          if(processed===files.length){saveData('coa');showToast('上传完成，已添加水印');openCOABatchForm(currentEditingCOABatch.id)}
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+}
+function addCOAImageWithWatermark(name,data){
+  if(!currentEditingCOABatch.images)currentEditingCOABatch.images=[];
+  currentEditingCOABatch.images.push({id:'img_'+Date.now()+'_'+Math.random().toString(36).substr(2,5),name:name,data:data});
+}
+function addWatermarkToImage(imageData,fileName){
+  return new Promise((resolve,reject)=>{
+    const img=new Image();
+    img.onload=function(){
+      const canvas=document.createElement('canvas');
+      canvas.width=img.width;
+      canvas.height=img.height;
+      const ctx=canvas.getContext('2d');
+      ctx.drawImage(img,0,0);
+      // Watermark settings
+      ctx.save();
+      ctx.globalAlpha=0.12;
+      ctx.fillStyle='#000000';
+      const fontSize=Math.max(24,Math.min(img.width,img.height)/15);
+      ctx.font='bold '+fontSize+'px Arial';
+      ctx.textAlign='center';
+      ctx.textBaseline='middle';
+      // Rotate -30 degrees
+      const angle=-Math.PI/6;
+      // Calculate spacing
+      const text='PeptideLab COA Verified';
+      const textWidth=ctx.measureText(text).width;
+      const spacingX=textWidth*1.5;
+      const spacingY=fontSize*3;
+      // Draw watermark from top-left to bottom-right, covering entire image
+      const diagonal=Math.sqrt(img.width*img.width+img.height*img.height);
+      const rows=Math.ceil(diagonal/spacingY)+2;
+      const cols=Math.ceil(diagonal/spacingX)+2;
+      ctx.translate(img.width/2,img.height/2);
+      ctx.rotate(angle);
+      for(let r=-rows;r<=rows;r++){
+        for(let col=-cols;col<=cols;col++){
+          ctx.fillText(text,col*spacingX,r*spacingY);
+        }
       }
+      ctx.restore();
+      resolve(canvas.toDataURL('image/png',0.9));
     };
-    reader.readAsDataURL(file);
+    img.onerror=reject;
+    img.src=imageData;
+  });
+}
+function convertPPTToImages(file){
+  return new Promise((resolve,reject)=>{
+    if(typeof PptxJS==='undefined'){reject(new Error('PPT转换库未加载'));return}
+    const reader=new FileReader();
+    reader.onload=function(e){
+      try{
+        const pptx=new PptxJS();
+        pptx.load(e.target.result).then(data=>{
+          const slides=data.slides;
+          const images=[];
+          let slideIdx=0;
+          function renderNextSlide(){
+            if(slideIdx>=slides.length){resolve(images);return}
+            const slide=slides[slideIdx];
+            const canvas=document.createElement('canvas');
+            canvas.width=960;
+            canvas.height=540;
+            const ctx=canvas.getContext('2d');
+            ctx.fillStyle='#ffffff';
+            ctx.fillRect(0,0,canvas.width,canvas.height);
+            // Try to render slide text content
+            if(slide.shapes){
+              slide.shapes.forEach(shape=>{
+                if(shape.text&&shape.text.text){
+                  ctx.fillStyle='#000000';
+                  ctx.font='16px Arial';
+                  ctx.textAlign='left';
+                  const x=shape.left?shape.left*960:20;
+                  const y=shape.top?shape.top*540+20:40;
+                  const lines=shape.text.text.split('\n');
+                  lines.forEach((line,i)=>{ctx.fillText(line,x,y+i*20)});
+                }
+              });
+            }
+            ctx.fillStyle='#666666';
+            ctx.font='14px Arial';
+            ctx.textAlign='center';
+            ctx.fillText('Slide '+(slideIdx+1)+' / '+slides.length,480,510);
+            images.push(canvas.toDataURL('image/png'));
+            slideIdx++;
+            setTimeout(renderNextSlide,50);
+          }
+          renderNextSlide();
+        }).catch(reject);
+      }catch(err){reject(err)}
+    };
+    reader.onerror=reject;
+    reader.readAsArrayBuffer(file);
   });
 }
 function deleteCOAImage(idx){
