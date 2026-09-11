@@ -391,7 +391,7 @@ function renderForumAdmin(el){
   items.forEach(p=>{
     const commentCount=p.comments?p.comments.length:(p.replies||0);
     const title=(p.title||'').substring(0,40)+((p.title||'').length>40?'...':'');
-    html+='<tr><td style="max-width:250px">'+title+'</td><td>'+(p.author||'-')+'</td><td>'+(p.date||'-')+'</td><td>'+commentCount+'</td><td>'+(p.views||0)+'</td><td>'+(p.likes||0)+'</td><td><button class="btn btn-sm btn-secondary" onclick="openForumPostForm('+p.id+')">编辑</button> <button class="btn btn-sm btn-info" onclick="enterForumComments('+p.id+')">管理评论</button> <button class="btn btn-sm btn-danger" onclick="deleteForumPost('+p.id+')">删除</button></td></tr>';
+    html+='<tr><td style="max-width:250px"><span style="color:var(--primary);cursor:pointer;font-weight:600;text-decoration:underline" onclick="enterForumComments('+p.id+')">'+title+'</span></td><td>'+(p.author||'-')+'</td><td>'+(p.date||'-')+'</td><td>'+commentCount+'</td><td>'+(p.views||0)+'</td><td>'+(p.likes||0)+'</td><td><button class="btn btn-sm btn-secondary" onclick="openForumPostForm('+p.id+')">编辑</button> <button class="btn btn-sm btn-info" onclick="enterForumComments('+p.id+')">查看详情</button> <button class="btn btn-sm btn-danger" onclick="deleteForumPost('+p.id+')">删除</button></td></tr>';
   });
   html+='</tbody></table></div>';
   el.innerHTML=html;
@@ -404,9 +404,11 @@ function renderForumComments(el){
   const post=FORUM_POSTS.find(p=>p.id===currentForumPostId);
   if(!post){currentForumPostId=null;renderContent();return}
   const comments=post.comments||[];
-  let html='<div class="panel"><div class="panel-toolbar"><button class="btn btn-secondary" onclick="backToForumList()">← 返回帖子列表</button><span style="font-size:14px;font-weight:600;margin-left:12px">帖子：'+post.title+'</span><span style="font-size:13px;color:var(--text-muted);margin-left:auto">共 '+comments.length+' 条评论</span><button class="btn btn-primary" onclick="openForumCommentForm(null)">+ 添加评论</button></div>';
+  const postImgs=(post.images&&post.images.length>0)?'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">'+post.images.map(img=>'<img src="'+img+'" style="width:100px;height:100px;object-fit:cover;border-radius:6px;cursor:pointer;border:1px solid #ddd" onclick="viewAdminImage(\''+img+'\')">').join('')+'</div>':'';
+  let html='<div class="panel"><div class="panel-toolbar"><button class="btn btn-secondary" onclick="backToForumList()">← 返回帖子列表</button><span style="font-size:14px;font-weight:600;margin-left:12px">帖子详情</span><span style="font-size:13px;color:var(--text-muted);margin-left:auto">共 '+comments.length+' 条评论</span><button class="btn btn-primary" onclick="openForumCommentForm(null)">+ 添加评论</button></div>';
+  html+='<div style="padding:20px;background:var(--bg);border-radius:8px;margin-bottom:20px"><div style="font-size:18px;font-weight:700;margin-bottom:10px">'+post.title+'</div><div style="font-size:13px;color:var(--text-muted);margin-bottom:12px">作者：'+(post.author||'-')+' · 日期：'+(post.date||'-')+' · 浏览：'+(post.views||0)+' · 点赞：'+(post.likes||0)+'</div><div style="font-size:14px;line-height:1.8;color:var(--text);white-space:pre-wrap">'+(post.content||'')+'</div>'+postImgs+'</div>';
   if(comments.length===0){html+='<div class="admin-empty">暂无评论</div></div>';el.innerHTML=html;return}
-  html+='<table class="admin-table"><thead><tr><th>用户</th><th>评论内容</th><th>图片</th><th>日期</th><th>点赞</th><th>操作</th></tr></thead><tbody>';
+  html+='<h4 style="margin:0 0 12px 0;font-size:15px">评论列表</h4><table class="admin-table"><thead><tr><th>用户</th><th>评论内容</th><th>图片</th><th>日期</th><th>点赞</th><th>操作</th></tr></thead><tbody>';
   comments.forEach(cm=>{
     const content=(cm.content||'').substring(0,60)+((cm.content||'').length>60?'...':'');
     const imgs=(cm.images&&cm.images.length>0)?'<div style="display:flex;gap:4px;flex-wrap:wrap">'+cm.images.slice(0,3).map(img=>'<img src="'+img+'" style="width:40px;height:40px;object-fit:cover;border-radius:4px;cursor:pointer" onclick="viewAdminImage(\''+img+'\')">').join('')+(cm.images.length>3?'<span style="font-size:11px;color:var(--text-muted)">+'+(cm.images.length-3)+'</span>':'')+'</div>':'-';
