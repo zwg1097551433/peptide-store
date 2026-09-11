@@ -338,7 +338,43 @@ function renderReviewsAdmin(el){
   el.innerHTML=html;
 }
 function viewAdminImage(src){const overlay=document.createElement('div');overlay.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);display:flex;align-items:center;justify-content:center;z-index:9999;cursor:pointer';overlay.innerHTML='<img src="'+src+'" style="max-width:90%;max-height:90%;object-fit:contain">';overlay.onclick=()=>overlay.remove();document.body.appendChild(overlay);}
-function filterReviewsByProduct(name){showToast('筛选产品: '+name);}
+let _currentReviewProduct=null;
+function filterReviewsByProduct(name){
+  _currentReviewProduct=name;
+  renderProductReviewsDetail(name);
+}
+function renderProductReviewsDetail(productName){
+  const el=document.getElementById('adminContent');
+  const items=REVIEWS.filter(r=>(r.productName||'')===productName||(r.productName&&productName&&r.productName.toLowerCase().includes(productName.toLowerCase()))).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const avgRating=items.length>0?(items.reduce((s,r)=>s+r.rating,0)/items.length).toFixed(1):'0.0';
+  let html='<div class="panel">';
+  html+='<div class="panel-toolbar"><button class="btn btn-secondary" onclick="renderContent()">&larr; 返回评价列表</button><span style="font-size:16px;font-weight:600;margin-left:12px">📦 '+productName+'</span><span style="margin-left:auto;font-size:13px;color:var(--text-muted)">共 '+items.length+' 条评价 | 平均分 '+avgRating+'</span></div>';
+  if(items.length===0){html+='<div class="admin-empty">该产品暂无评价</div></div>';el.innerHTML=html;return}
+  html+='<div style="padding:20px">';
+  items.forEach((r,idx)=>{
+    const stars='★'.repeat(r.rating)+'☆'.repeat(5-r.rating);
+    const imgs=(r.images&&r.images.length>0)?'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">'+r.images.map(img=>'<img src="'+img+'" style="width:80px;height:80px;object-fit:cover;border-radius:4px;cursor:pointer;border:1px solid var(--border)" onclick="viewAdminImage(\''+img+'\')">').join('')+'</div>':'';
+    html+='<div style="border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:16px;background:var(--bg)">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">';
+    html+='<div style="display:flex;align-items:center;gap:10px"><div style="width:36px;height:36px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600">'+(r.username||'U').charAt(0).toUpperCase()+'</div><div><div style="font-weight:600">'+(r.username||'Anonymous')+'</div><div style="font-size:12px;color:var(--text-muted)">'+r.date+'</div></div></div>';
+    html+='<div style="color:#ffc107;font-size:16px">'+stars+'</div>';
+    html+='</div>';
+    html+='<div style="font-size:14px;line-height:1.6;color:var(--text)">'+r.content+'</div>';
+    html+=imgs;
+    html+='<div style="margin-top:12px;display:flex;gap:8px"><button class="btn btn-sm btn-secondary" onclick="openReviewForm(\''+r.id+'\')">编辑评价</button><button class="btn btn-sm btn-danger" onclick="deleteReviewFromDetail(\''+r.id+'\')">删除</button></div>';
+    html+='</div>';
+  });
+  html+='</div></div>';
+  el.innerHTML=html;
+}
+function deleteReviewFromDetail(id){
+  if(!confirm('确定删除这条评价？'))return;
+  REVIEWS=REVIEWS.filter(r=>r.id!==id);
+  saveData('reviews');
+  showToast('评价已删除');
+  if(_currentReviewProduct){renderProductReviewsDetail(_currentReviewProduct);}
+  else{renderContent();}
+}
 function openReviewForm(id){
   const r=id?REVIEWS.find(x=>x.id===id):{id:'',productName:'',username:'',rating:5,content:'',images:[],date:new Date().toISOString().split('T')[0]};
   if(!r)return;
@@ -398,7 +434,7 @@ function saveReviewForm(id){
   _reviewImagesTemp=[];
   closeModal();
   showToast('评价已保存');
-  renderContent();
+  if(_currentReviewProduct){renderProductReviewsDetail(_currentReviewProduct);}else{renderContent();}
 }
 function deleteReview(id){
   if(!confirm('确定删除这条评价？'))return;
