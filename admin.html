@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PeptideLab 管理后台</title>
+<title>AVATR 管理后台</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap">
 <style>
@@ -141,7 +141,7 @@ if (typeof pdfjsLib !== 'undefined') {
 <!-- Login Screen -->
 <div class="login-screen" id="loginScreen">
   <div class="login-box">
-    <h1>PeptideLab 管理后台</h1>
+    <h1>AVATR 管理后台</h1>
     <p>请输入管理员密码登录</p>
     <label>管理员密码</label>
     <input type="password" id="adminPassword" placeholder="请输入密码" onkeydown="if(event.key==='Enter')doLogin()">
@@ -153,7 +153,7 @@ if (typeof pdfjsLib !== 'undefined') {
 <!-- Admin Layout -->
 <div class="admin-layout" id="adminLayout">
   <div class="admin-sidebar">
-    <div class="admin-logo">PeptideLab 后台</div>
+    <div class="admin-logo">AVATR 后台</div>
     <div class="admin-nav-item active" data-tab="dashboard" onclick="switchTab('dashboard')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>数据概览</div>
     <div class="admin-nav-item" data-tab="products" onclick="switchTab('products')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3v6l-5 9a2 2 0 001.8 3h12.4a2 2 0 001.8-3l-5-9V3"/></svg>产品管理</div>
     <div class="admin-nav-item" data-tab="categories" onclick="switchTab('categories')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>分类管理</div>
@@ -621,17 +621,17 @@ function renderCOAManager(el){
 function openCOABatchForm(batchId){
   currentEditingCOABatch=batchId?COA_RECORDS.find(b=>b.id===batchId):null;
   const isEdit=!!currentEditingCOABatch;
-  const b=currentEditingCOABatch||{batchNumber:'',date:new Date().toISOString().split('T')[0],products:'',watermark:'PeptideLab COA',images:[]};
+  const b=currentEditingCOABatch||{batchNumber:'',date:new Date().toISOString().split('T')[0],products:'',watermark:'AVATR COA',images:[]};
   let html='<div class="panel"><h3 style="margin-bottom:16px;">'+(isEdit?'管理批次: '+b.batchNumber:'新建COA批次')+'</h3>';
   html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">';
   html+='<div><label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">批号 *</label><input type="text" id="coaBatchNum" value="'+b.batchNumber+'" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;" placeholder="如 20260818"></div>';
   html+='<div><label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">检测日期</label><input type="date" id="coaBatchDate" value="'+b.date+'" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;"></div>';
   html+='<div style="grid-column:1/-1;"><label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">包含产品</label><input type="text" id="coaBatchProducts" value="'+(b.products||'')+'" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;" placeholder="如 Tirzepatide, Semaglutide"></div>';
-  html+='<div style="grid-column:1/-1;"><label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">水印文字（上传图片时自动添加）</label><input type="text" id="coaWatermark" value="'+(b.watermark||'PeptideLab COA')+'" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;" placeholder="如 PeptideLab COA Verified"></div>';
+  html+='<div style="grid-column:1/-1;"><label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">水印文字（上传图片时自动添加）</label><input type="text" id="coaWatermark" value="'+(b.watermark||'AVATR COA')+'" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;" placeholder="如 AVATR COA Verified"></div>';
   html+='</div>';
   if(isEdit){
     html+='<div style="margin-bottom:16px;"><label style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;">上传COA报告图片（可多选）</label><input type="file" id="coaImageUpload" accept="image/*,.pptx,.ppt,.pdf" multiple style="margin-bottom:12px;"><p style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">支持图片(JPG/PNG/GIF)、PPT/PPTX、PDF格式，上传后自动添加水印</p><button class="btn btn-primary btn-sm" onclick="uploadCOAImages()">上传文件</button> <button class="btn btn-secondary btn-sm" onclick="checkStorageUsage()" style="margin-left:8px;">查看存储</button></div> <div id="storageInfo" style="font-size:11px;color:var(--text-muted);margin-top:6px;"></div>';
-    html+='<div style="margin-bottom:16px;padding:12px;background:var(--bg);border-radius:6px;"> <div style="display:flex;gap:8px;align-items:center;"> <input type="text" id="coaWatermarkQuick" value="'+(b.watermark||'PeptideLab COA')+'" style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:6px;" placeholder="输入水印文字"> <button class="btn btn-primary btn-sm" onclick="quickSaveWatermark()">一键保存</button> <button class="btn btn-secondary btn-sm" onclick="quickReplaceWatermark()" style="background:#ff9800;color:#fff;border-color:#ff9800;">一键替换</button> </div> <p style="font-size:11px;color:var(--text-muted);margin-top:6px;">一键保存：后续上传图片使用此水印 | 一键替换：替换所有已上传图片的水印</p> </div>';
+    html+='<div style="margin-bottom:16px;padding:12px;background:var(--bg);border-radius:6px;"> <div style="display:flex;gap:8px;align-items:center;"> <input type="text" id="coaWatermarkQuick" value="'+(b.watermark||'AVATR COA')+'" style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:6px;" placeholder="输入水印文字"> <button class="btn btn-primary btn-sm" onclick="quickSaveWatermark()">一键保存</button> <button class="btn btn-secondary btn-sm" onclick="quickReplaceWatermark()" style="background:#ff9800;color:#fff;border-color:#ff9800;">一键替换</button> </div> <p style="font-size:11px;color:var(--text-muted);margin-top:6px;">一键保存：后续上传图片使用此水印 | 一键替换：替换所有已上传图片的水印</p> </div>';
     const imgs=b.images||[];
     if(imgs.length>0){
       html+='<h4 style="margin-bottom:12px;font-size:14px;">已上传图片 ('+imgs.length+')</h4><div class="coa-image-list">';
@@ -788,7 +788,7 @@ function addCOAImageWithOriginal(name,originalData){
 }
 function applyWatermarkToAllImages(){
   return new Promise((resolve)=>{
-    const watermarkText=currentEditingCOABatch.watermark||'PeptideLab COA';
+    const watermarkText=currentEditingCOABatch.watermark||'AVATR COA';
     const images=currentEditingCOABatch.images||[];
     if(images.length===0){resolve();return}
     let processed=0;
@@ -868,7 +868,7 @@ function addWatermarkToImage(imageData,fileName,watermarkText){
       ctx.textAlign='center';
       ctx.textBaseline='middle';
       const angle=-Math.PI/6;
-      const text=watermarkText||'PeptideLab COA';
+      const text=watermarkText||'AVATR COA';
       const textWidth=ctx.measureText(text).width;
       const spacingX=textWidth*1.5;
       const spacingY=fontSize*3;
@@ -1443,7 +1443,7 @@ function renderSettings(el){
     '<p style="margin-top:12px;font-size:12px;color:var(--text-light);">注意：重置将清除所有自定义修改，恢复为初始数据。</p></div>';
 }
 function changePwd(){const p=document.getElementById('newPwd').value;if(!p){showToast('请输入新密码');return}Store.set('admin_password',p);showToast('密码已修改，请重新登录');logout()}
-function exportData(){const data={products:PRODUCTS,categories:CATEGORIES,announcements:ANNOUNCEMENTS,forum:FORUM_POSTS,reviews:REVIEWS,coa:COA_RECORDS,factory:FACTORY_ITEMS,orders:Store.get('orders',[])};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='peptidelab_backup_'+new Date().toISOString().split('T')[0]+'.json';a.click();URL.revokeObjectURL(url);showToast('数据已导出')}
+function exportData(){const data={products:PRODUCTS,categories:CATEGORIES,announcements:ANNOUNCEMENTS,forum:FORUM_POSTS,reviews:REVIEWS,coa:COA_RECORDS,factory:FACTORY_ITEMS,orders:Store.get('orders',[])};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='avatr_backup_'+new Date().toISOString().split('T')[0]+'.json';a.click();URL.revokeObjectURL(url);showToast('数据已导出')}
 function resetData(){if(!confirm('确定重置所有数据为默认值？此操作不可撤销！'))return;localStorage.removeItem('pl_products');localStorage.removeItem('pl_categories');localStorage.removeItem('pl_announcements');localStorage.removeItem('pl_forum');localStorage.removeItem('pl_reviews');localStorage.removeItem('pl_coa');localStorage.removeItem('pl_factory');localStorage.removeItem('pl_orders');localStorage.removeItem('pl_clicks');localStorage.removeItem('pl_cart');PRODUCTS=DEFAULT_PRODUCTS;CATEGORIES=DEFAULT_CATEGORIES;ANNOUNCEMENTS=DEFAULT_ANNOUNCEMENTS;FORUM_POSTS=DEFAULT_FORUM;REVIEWS=DEFAULT_REVIEWS;COA_RECORDS=DEFAULT_COA;FACTORY_ITEMS=DEFAULT_FACTORY;showToast('数据已重置');renderContent()}
 
 // ===== Form (Add/Edit) =====
